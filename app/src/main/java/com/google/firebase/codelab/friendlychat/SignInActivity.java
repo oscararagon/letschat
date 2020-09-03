@@ -39,6 +39,8 @@ import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class SignInActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int PERMISSION_REQUEST = 0;
@@ -46,7 +48,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
 
     private Button mSignInButton;
-    private ImageView imgProfilePic, imgEditProfilePic;
+    private ImageView imgEditProfilePic;
+    private CircleImageView imgProfilePic;
     private EditText txtMobile, txtUsername;
     private TextView messagesLogin;
 
@@ -59,7 +62,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         // Collega gli oggetti grafici al codice
         mSignInButton = (Button) findViewById(R.id.sign_in_button);
-        imgProfilePic = (ImageView) findViewById(R.id.profileImage);
+        imgProfilePic = (CircleImageView) findViewById(R.id.profileImage);
         imgEditProfilePic =  (ImageView) findViewById(R.id.imgEditProfilePic);
         txtMobile = (EditText) findViewById(R.id.mobile);
         txtUsername = (EditText) findViewById(R.id.username);
@@ -82,7 +85,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.imgEditProfilePic:
                 //edit profile picture
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                        v.getContext().checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                        checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
                     requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
                 }
 
@@ -111,21 +114,25 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
+        switch (requestCode) {
             case RESULT_LOAD_IMAGE:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     Uri selectedImage = data.getData();
                     String[] filePathColumn = {MediaStore.Images.Media.DATE_ADDED};
-                    Cursor c = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-                    c.moveToFirst();
-                    int columnIndex = c.getColumnIndex(filePathColumn[0]);
-                    String picturePath = c.getString(columnIndex);
-                    c.close();
-                    imgProfilePic.setImageResource(0);
-                    imgProfilePic.setBackgroundResource(0);
-                    imgProfilePic.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+                    if(selectedImage != null){
+                        Cursor c = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+                        if(c != null){
+                            c.moveToFirst();
+                            int columnIndex = c.getColumnIndex(filePathColumn[0]);
+                            String picturePath = c.getString(columnIndex);
+                            c.close();
+                            imgProfilePic.setImageResource(0);
+                            imgProfilePic.setBackgroundResource(0);
+                            imgProfilePic.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+                        }
+                    }
                 }
         }
     }
@@ -136,8 +143,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             if(!user.isEmpty()){
                 //valid mobile phone and username
                 Intent intent = new Intent(SignInActivity.this, VerifyMobileActivity.class);
+                intent.putExtra("mobileNumber", mobile);
+                intent.putExtra("username", user);
                 startActivity(intent);
-                Toast.makeText(this, "Welcome " + user, Toast.LENGTH_SHORT).show();
             }else{
                 //username empty
                 messagesLogin.setText(R.string.invalid_username);

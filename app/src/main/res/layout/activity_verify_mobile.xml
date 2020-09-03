@@ -41,7 +41,8 @@
             android:text="go"/>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/layoutResend"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 

@@ -47,6 +47,7 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-database:6.3.0'
 
     // Testing dependencies
+    implementation 'com.google.firebase:firebase-firestore:21.4.3'
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
