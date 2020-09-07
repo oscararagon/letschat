@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.firebase.codelab.friendlychat;
+package com.google.firebase.codelab.letschat;
 
 
 import androidx.test.filters.LargeTest;

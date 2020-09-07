@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.firebase.codelab.friendlychat">
+    package="com.google.firebase.codelab.letschat">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SEND_SMS" />
@@ -12,9 +12,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ChatActivity"/>
+        <activity android:name="com.google.firebase.codelab.letschat.ChatActivity"/>
 
-        <activity android:name=".SignInActivity">
+        <activity android:name="com.google.firebase.codelab.letschat.SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,9 +22,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".HomeActivity" />
+        <activity android:name="com.google.firebase.codelab.letschat.HomeActivity" />
 
-        <activity android:name=".VerifyMobileActivity" />
+        <activity android:name="com.google.firebase.codelab.letschat.VerifyMobileActivity" />
 
     </application>
 

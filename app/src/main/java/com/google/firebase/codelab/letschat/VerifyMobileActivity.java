@@ -1,7 +1,9 @@
-package com.google.firebase.codelab.friendlychat;
+package com.google.firebase.codelab.letschat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -18,7 +20,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class VerifyMobileActivity extends AppCompatActivity {
 
@@ -28,10 +35,18 @@ public class VerifyMobileActivity extends AppCompatActivity {
     private Button btnVerify;
     private LinearLayout layoutResend;
 
+    private FirebaseFirestore db;
+    private SharedPreferences sp;
+
     private Intent intent;
     private String mobileNumber;
     private String message = "Your Let's Chat verification code is";
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
+
+    private static final String USERNAME = "username";
+    private static final String MOBILE = "mobile";
+    private static final String PROFILE_PIC = "profilePic";
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,8 +54,10 @@ public class VerifyMobileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_verify_mobile);
 
         intent = getIntent();
+        sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db = FirebaseFirestore.getInstance();
 
         mobileNumber = intent.getStringExtra("mobileNumber");
 
@@ -67,10 +84,28 @@ public class VerifyMobileActivity extends AppCompatActivity {
                 if(codeVerification.getText().toString().equals(String.valueOf(randCode))){
                     /**aggiungere l'utente al db Firestore*/
 
+                    Map<String, Object> user = new HashMap<>();
+                    user.put(USERNAME, intent.getStringExtra("username"));
+                    user.put(MOBILE, intent.getStringExtra("mobileNumber"));
+                    user.put(PROFILE_PIC, sp.getString("profilePic", ""));
 
-                    Toast.makeText(view.getContext(), "Welcome "+intent.getStringExtra("username"), Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(VerifyMobileActivity.this, HomeActivity.class);
-                    startActivity(intent);
+                    db.collection("Users").document(intent.getStringExtra("mobileNumber")).set(user)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(VerifyMobileActivity.this, R.string.welcome+""+intent.getStringExtra("username"), Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(VerifyMobileActivity.this, HomeActivity.class);
+                            startActivity(intent);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            //controllare la presenza dell'utente nel db
+
+
+                        }
+                    });
                 }
             }
         });
