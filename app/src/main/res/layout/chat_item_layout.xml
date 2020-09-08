@@ -30,7 +30,7 @@
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                android:textSize="20sp"
-               android:textColor="@color/cardview_dark_background"
+               android:textColor="#000000"
                android:text="USERNAME PERSONA"/>
 
            <LinearLayout
@@ -60,6 +60,7 @@
        <TextView
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
+           android:layout_marginLeft="5dp"
            android:textSize="12sp"
            android:text="timestamp"/>
 

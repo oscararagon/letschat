@@ -29,8 +29,7 @@ import java.util.Map;
 
 public class VerifyMobileActivity extends AppCompatActivity {
 
-
-    private TextView txtVerify;
+    private TextView txtVerify, messagesVerify;
     private EditText codeVerification;
     private Button btnVerify;
     private LinearLayout layoutResend;
@@ -65,6 +64,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
         codeVerification = (EditText) findViewById(R.id.codeVerification);
         btnVerify = (Button) findViewById(R.id.btnVerify);
         layoutResend = (LinearLayout) findViewById(R.id.layoutResend);
+        messagesVerify = (TextView) findViewById(R.id.warningVerify);
 
 
         txtVerify.append(" "+mobileNumber);
@@ -106,6 +106,10 @@ public class VerifyMobileActivity extends AppCompatActivity {
 
                         }
                     });
+                }
+                else{
+                    messagesVerify.setText(R.string.invalid_verify_code);
+                    messagesVerify.setVisibility(View.VISIBLE);
                 }
             }
         });
