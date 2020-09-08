@@ -5,5 +5,5 @@
     <string name="sign_out">Sign Out</string>
     <string name="invalid_username">Please enter a username</string>
     <string name="invalid_mobile">Please enter a valid mobile number</string>
-    <string name="login_empty_fields">Please enter a valid mobile \n number and a username</string>
+    <string name="login_empty_fields">Please enter a valid mobile number and a username</string>
 </resources>
