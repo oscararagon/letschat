@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,12 +30,15 @@ import java.util.Map;
 
 public class VerifyMobileActivity extends AppCompatActivity {
 
+
     private TextView txtVerify, messagesVerify;
     private EditText codeVerification;
     private Button btnVerify;
     private LinearLayout layoutResend;
+    private ProgressBar pBar;
 
-    private FirebaseFirestore db;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     private SharedPreferences sp;
 
     private Intent intent;
@@ -55,16 +59,13 @@ public class VerifyMobileActivity extends AppCompatActivity {
         intent = getIntent();
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
-
-        db = FirebaseFirestore.getInstance();
-
         mobileNumber = intent.getStringExtra("mobileNumber");
-
         txtVerify = (TextView) findViewById(R.id.verifyMobile);
+        messagesVerify = (TextView) findViewById(R.id.warningVerify);
         codeVerification = (EditText) findViewById(R.id.codeVerification);
         btnVerify = (Button) findViewById(R.id.btnVerify);
+        pBar = (ProgressBar) findViewById(R.id.progress_bar);
         layoutResend = (LinearLayout) findViewById(R.id.layoutResend);
-        messagesVerify = (TextView) findViewById(R.id.warningVerify);
 
 
         txtVerify.append(" "+mobileNumber);
@@ -80,34 +81,37 @@ public class VerifyMobileActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
+                pBar.setVisibility(View.VISIBLE);
                 //verifico che il contenuto di codeVerification coincida con il codeNumber mandato per SMS
                 if(codeVerification.getText().toString().equals(String.valueOf(randCode))){
-                    /**aggiungere l'utente al db Firestore*/
+                    /**aggiungere l'utente al db Firestore. Inoltre salvo lo username in locale per i prossimi accessi*/
 
                     Map<String, Object> user = new HashMap<>();
                     user.put(USERNAME, intent.getStringExtra("username"));
+                    sp.edit().putString("username", intent.getStringExtra("username")).apply();
+
                     user.put(MOBILE, intent.getStringExtra("mobileNumber"));
                     user.put(PROFILE_PIC, sp.getString("profilePic", ""));
 
                     db.collection("Users").document(intent.getStringExtra("mobileNumber")).set(user)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(VerifyMobileActivity.this, R.string.welcome+""+intent.getStringExtra("username"), Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(VerifyMobileActivity.this, HomeActivity.class);
-                            startActivity(intent);
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            //controllare la presenza dell'utente nel db
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Toast.makeText(VerifyMobileActivity.this, "Welcome "+intent.getStringExtra("username"), Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(VerifyMobileActivity.this, HomeActivity.class);
+                                    startActivity(intent);
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    //controllare la presenza dell'utente nel db
 
 
-                        }
-                    });
-                }
-                else{
+                                }
+                            });
+                }else{
+                    pBar.setVisibility(View.GONE);
                     messagesVerify.setText(R.string.invalid_verify_code);
                     messagesVerify.setVisibility(View.VISIBLE);
                 }

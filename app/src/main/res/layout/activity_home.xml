@@ -12,4 +12,13 @@
         android:layout_height="match_parent"
         android:id="@+id/chatList"/>
 
+
+    <TextView
+        android:textSize="20sp"
+        android:layout_gravity="center_vertical"
+        android:text="@string/chat_list_empty"
+        android:id="@+id/listEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

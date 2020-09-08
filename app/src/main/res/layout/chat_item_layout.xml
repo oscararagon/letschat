@@ -54,7 +54,6 @@
                    android:text="last message"/>
 
            </LinearLayout>
-
        </LinearLayout>
 
        <TextView

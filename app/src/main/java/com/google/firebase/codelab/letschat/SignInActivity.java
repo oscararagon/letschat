@@ -30,6 +30,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.io.IOException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -47,15 +49,19 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private EditText txtMobile, txtUsername;
     private TextView messagesLogin;
 
-    // Firebase instance variables
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-        //recupero lo SharedPreferences
+        //recupero lo SharedPreferences per poter poi salvare l'immagine profilo e lo username dell'utente
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
+        //controllo che l'utente con questo cellulare non sia già loggato
+        if(sp.contains("username")){
+            Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
+            startActivity(intent);
+        }
 
         // Collega gli oggetti grafici al codice
         mSignInButton = (Button) findViewById(R.id.sign_in_button);
@@ -69,6 +75,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         // Set click listeners
         mSignInButton.setOnClickListener(this);
         imgEditProfilePic.setOnClickListener(this);
+
+
 
     }
 
@@ -127,13 +135,14 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     Bitmap bitmap = null;
                     Uri selectedImage = null;
                     try {
-                       selectedImage = data.getData();
-                       bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+                        selectedImage = data.getData();
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     try {
-                        ExifInterface exif = new ExifInterface(getPath(this, selectedImage));
+                        String imgPath = getPath(this, selectedImage);
+                        ExifInterface exif = new ExifInterface(imgPath);
                         String orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
                         switch(orientation){
                             case "6":
@@ -155,7 +164,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                                 imgProfilePic.setImageBitmap(bitmap);
                                 break;
                         }
-                        sp.edit().putString("profilePic", selectedImage.toString()).apply();
+                        //salvo l'immagine profilo nelle SharedPreferences
+                        sp.edit().putString("profilePic", imgPath).apply();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -285,7 +295,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         String regex = "^\\d{10}$"; //regex per il numero di cellulare: controlla che abbia 10 cifre
         if(mobile.matches(regex)){
             if(!user.isEmpty()){
-                //valid mobile phone and username
+                //valid mobile phone and username.
                 Intent intent = new Intent(SignInActivity.this, VerifyMobileActivity.class);
                 intent.putExtra("mobileNumber", mobile);
                 intent.putExtra("username", user);

@@ -7,4 +7,5 @@
     <string name="invalid_mobile">Please enter a valid mobile number</string>
     <string name="login_empty_fields">Please enter a valid mobile number and a username</string>
     <string name="invalid_verify_code">The 6-digit code is invalid</string>
+    <string name="chat_list_empty">Let\'s add a new Chat!</string>
 </resources>
