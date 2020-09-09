@@ -26,6 +26,9 @@
 
         <activity android:name="com.google.firebase.codelab.letschat.VerifyMobileActivity" />
 
+        <activity android:name="com.google.firebase.codelab.letschat.ContactsActivity" />
+
+
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,11 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:layout_gravity="center"
             android:id="@+id/item_profile_photo"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            app:civ_border_width="2dp"
             android:src="@drawable/ic_account_circle_black_36dp"/>
 
         <LinearLayout
@@ -32,6 +34,13 @@
                 android:textSize="20sp"
                 android:textColor="@color/cardview_dark_background"
                 android:text="USERNAME PERSONA"/>
+
+            <TextView
+                android:id="@+id/item_mobileNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="mobile number"/>
 
         </LinearLayout>
     </LinearLayout>

@@ -4,19 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/toolbar_home"
-        android:id="@+id/toolbar_home"/>
-
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/chatList"/>
+        android:id="@+id/contactList"/>
 
     <TextView
         android:textSize="20sp"
         android:layout_gravity="center_horizontal"
         android:text="@string/chat_list_empty"
-        android:id="@+id/listEmpty"
+        android:id="@+id/contactEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

@@ -1,4 +1,3 @@
-
 package com.google.firebase.codelab.letschat;
 
 import android.Manifest;
@@ -9,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -24,9 +24,12 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,11 +47,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private SharedPreferences sp;
 
     private Button mSignInButton;
-    private ImageView imgEditProfilePic;
+    private ImageView imgEditProfilePic, imgFullScreen;
     private CircleImageView imgProfilePic;
     private EditText txtMobile, txtUsername;
     private TextView messagesLogin;
 
+    private String imgPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         // Collega gli oggetti grafici al codice
         mSignInButton = (Button) findViewById(R.id.sign_in_button);
         imgProfilePic = (CircleImageView) findViewById(R.id.profileImage);
+        imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
         imgEditProfilePic =  (ImageView) findViewById(R.id.imgEditProfilePic);
         txtMobile = (EditText) findViewById(R.id.mobile);
         txtUsername = (EditText) findViewById(R.id.username);
@@ -75,7 +80,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         // Set click listeners
         mSignInButton.setOnClickListener(this);
         imgEditProfilePic.setOnClickListener(this);
-
+        imgProfilePic.setOnClickListener(this);
 
 
     }
@@ -105,8 +110,25 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
             case R.id.profileImage:
                 //show profile picture
-
+                if(imgPath != null) {
+                    imgFullScreen.setVisibility(View.VISIBLE);
+                    BitmapDrawable drawable = (BitmapDrawable) imgProfilePic.getDrawable();
+                    Bitmap bitmap = drawable.getBitmap();
+                    rotateImage(imgPath, bitmap, null, imgFullScreen);
+                    //salvo l'immagine profilo nelle SharedPreferences
+                    sp.edit().putString("profilePic", imgPath).apply();
+                }
                 break;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(imgFullScreen.getVisibility() == View.VISIBLE){
+            imgFullScreen.setImageDrawable(null);
+            imgFullScreen.setVisibility(View.GONE);
+        }else{
+            super.onBackPressed();
         }
     }
 
@@ -134,42 +156,71 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                     Bitmap bitmap = null;
                     Uri selectedImage = null;
+                    selectedImage = data.getData();
                     try {
-                        selectedImage = data.getData();
                         bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    try {
-                        String imgPath = getPath(this, selectedImage);
-                        ExifInterface exif = new ExifInterface(imgPath);
-                        String orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-                        switch(orientation){
-                            case "6":
-                                imgProfilePic.setImageResource(0);
-                                imgProfilePic.setBackgroundResource(0);
-                                imgProfilePic.setImageBitmap(bitmap);
-                                imgProfilePic.setRotation(90);
-                                break;
-                            case "8":
-                                imgProfilePic.setImageResource(0);
-                                imgProfilePic.setBackgroundResource(0);
-                                imgProfilePic.setImageBitmap(bitmap);
-                                imgProfilePic.setRotation(270);
-                                break;
-                            default:
-                                imgProfilePic.setRotation(0);
-                                imgProfilePic.setImageResource(0);
-                                imgProfilePic.setBackgroundResource(0);
-                                imgProfilePic.setImageBitmap(bitmap);
-                                break;
-                        }
-                        //salvo l'immagine profilo nelle SharedPreferences
-                        sp.edit().putString("profilePic", imgPath).apply();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    imgPath = getPath(this, selectedImage);
+
+                    rotateImage(imgPath, bitmap, imgProfilePic, null);
+                    //salvo l'immagine profilo nelle SharedPreferences
+                    sp.edit().putString("profilePic", imgPath).apply();
                 }
+        }
+    }
+
+    public void rotateImage(String imgPath, Bitmap bitmap, CircleImageView cImg, ImageView img){
+
+        try {
+            ExifInterface exif = new ExifInterface(imgPath);
+            String orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            if(cImg != null) {
+                switch (orientation) {
+                    case "6":
+                        cImg.setImageResource(0);
+                        cImg.setBackgroundResource(0);
+                        cImg.setImageBitmap(bitmap);
+                        cImg.setRotation(90);
+                        break;
+                    case "8":
+                        cImg.setImageResource(0);
+                        cImg.setBackgroundResource(0);
+                        cImg.setImageBitmap(bitmap);
+                        cImg.setRotation(270);
+                        break;
+                    default:
+                        cImg.setRotation(0);
+                        cImg.setImageResource(0);
+                        cImg.setBackgroundResource(0);
+                        cImg.setImageBitmap(bitmap);
+                        break;
+                }
+            }else{
+                switch (orientation) {
+                    case "6":
+                        img.setImageResource(0);
+                        img.setBackgroundResource(0);
+                        img.setImageBitmap(bitmap);
+                        img.setRotation(90);
+                        break;
+                    case "8":
+                        img.setImageResource(0);
+                        img.setBackgroundResource(0);
+                        img.setImageBitmap(bitmap);
+                        img.setRotation(270);
+                        break;
+                    default:
+                        img.setRotation(0);
+                        img.setImageResource(0);
+                        img.setBackgroundResource(0);
+                        img.setImageBitmap(bitmap);
+                        break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

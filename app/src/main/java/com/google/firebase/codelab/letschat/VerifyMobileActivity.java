@@ -89,6 +89,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
                     Map<String, Object> user = new HashMap<>();
                     user.put(USERNAME, intent.getStringExtra("username"));
                     sp.edit().putString("username", intent.getStringExtra("username")).apply();
+                    sp.edit().putString("mobile", intent.getStringExtra("mobileNumber")).apply();
 
                     user.put(MOBILE, intent.getStringExtra("mobileNumber"));
                     user.put(PROFILE_PIC, sp.getString("profilePic", ""));
