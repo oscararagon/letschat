@@ -7,22 +7,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_picture"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@drawable/ic_account_circle_black_36dp"
-        android:background="@color/colorPrimary"
-        app:civ_border_color="@color/cardview_dark_background"
-        app:civ_border_width="2dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+
+        android:layout_marginBottom="30dp"
+        android:text="Settings"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profileImage"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            app:civ_border_width="1dp"
+            android:src="@drawable/ic_baseline_account_circle_24" />
+
+
+        <ImageView
+            android:layout_gravity="bottom"
+            android:id="@+id/imgEditProfilePic"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_add_a_photo_24"/>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/editPic"
+        android:layout_marginTop="7dp"
+        android:layout_marginBottom="15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Change profile picture"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="20dp"/>
+        android:gravity="bottom"
+        android:textSize="14dp"/>
 
     <LinearLayout
         android:layout_margin="5dp"
@@ -30,17 +58,32 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="Edit username"/>
         <EditText
             android:id="@+id/edit_username"
+            android:hint="Edit username"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-
+            android:layout_marginHorizontal="12dp"
+            android:layout_height="50dp" />
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@color/colorPrimary"
+        android:text="save"/>
+
+    <Button
+        android:id="@+id/sign_out_button"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="170dp"
+        android:layout_marginHorizontal="10dp"
+        android:background="@color/colorError"
+        android:text="logout"/>
 
 </LinearLayout>

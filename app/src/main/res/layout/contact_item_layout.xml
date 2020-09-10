@@ -17,8 +17,8 @@
             android:id="@+id/item_profile_photo"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:civ_border_width="2dp"
-            android:src="@drawable/ic_account_circle_black_36dp"/>
+            app:civ_border_width="1dp"
+            android:src="@drawable/ic_baseline_account_circle_24"/>
 
         <LinearLayout
             android:layout_marginLeft="10dp"

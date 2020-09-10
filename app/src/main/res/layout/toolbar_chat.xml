@@ -13,20 +13,33 @@
     <ImageView
         android:layout_marginRight="10dp"
         android:id="@+id/imgContact"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="53dp"
+        android:layout_height="53dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/ic_account_circle_black_36dp" />
 
-    <TextView
-        android:id="@+id/contactName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.1"
-        android:padding="5dp"
-        android:text="NOME CONTATTO"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/contactName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="NOME CONTATTO"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/item_mobileNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"
+            android:textColor="#FFFFFF"
+            android:text="Mobile number"/>
+    </LinearLayout>
 
     <ImageView
         android:visibility="gone"
