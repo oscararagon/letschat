@@ -3,6 +3,7 @@ package com.google.firebase.codelab.letschat;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -58,7 +59,8 @@ public class ContactsActivity extends AppCompatActivity {
                                     }
                                 }
                                 if(totalUsers < 1){
-                                    contactList.setEmptyView(txtEmptyList);
+                                    txtEmptyList.setVisibility(View.VISIBLE);
+                                    //contactList.setEmptyView(txtEmptyList);
                                 }else {
                                     UserAdapter adapter = new UserAdapter(ContactsActivity.this, contact_item_layout, users);
                                     contactList.setAdapter(adapter);

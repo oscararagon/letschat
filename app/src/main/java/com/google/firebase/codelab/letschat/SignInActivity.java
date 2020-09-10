@@ -35,7 +35,9 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -350,6 +352,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 Intent intent = new Intent(SignInActivity.this, VerifyMobileActivity.class);
                 intent.putExtra("mobileNumber", mobile);
                 intent.putExtra("username", user);
+
+                BitmapDrawable bd = (BitmapDrawable) imgProfilePic.getDrawable();
+                Bitmap bitmap = bd.getBitmap();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
+                intent.putExtra("byteArrayImg", baos.toByteArray());
                 startActivity(intent);
             }else{
                 //username empty
