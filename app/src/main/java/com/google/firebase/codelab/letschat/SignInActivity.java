@@ -55,10 +55,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private String imgPath;
     private boolean imgIsNull = true;
 
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
