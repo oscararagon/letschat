@@ -108,13 +108,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
             case R.id.profileImage:
                 //show profile picture
-                if(imgPath != null) {
+                if(imgPath != null ) {
                     imgFullScreen.setVisibility(View.VISIBLE);
                     BitmapDrawable drawable = (BitmapDrawable) imgProfilePic.getDrawable();
                     Bitmap bitmap = drawable.getBitmap();
                     rotateImage(imgPath, bitmap, null, imgFullScreen);
-                    //salvo l'immagine profilo nelle SharedPreferences
-                    sp.edit().putString("profilePic", imgPath).apply();
                 }
                 break;
 
@@ -172,13 +170,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     rotateImage(imgPath, bitmap, imgProfilePic, null);
                     imgIsNull = false;
                     imgRemoveProfilePic.setVisibility(View.VISIBLE);
-                    //salvo l'immagine profilo nelle SharedPreferences
-                    sp.edit().putString("localImgPath", imgPath).apply();
                 }
         }
     }
 
-    public void rotateImage(String imgPath, Bitmap bitmap, CircleImageView cImg, ImageView img){
+    public static void rotateImage(String imgPath, Bitmap bitmap, CircleImageView cImg, ImageView img){
 
         try {
             ExifInterface exif = new ExifInterface(imgPath);
@@ -357,12 +353,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 Intent intent = new Intent(SignInActivity.this, VerifyMobileActivity.class);
                 intent.putExtra("mobileNumber", mobile);
                 intent.putExtra("username", user);
-
-                BitmapDrawable bd = (BitmapDrawable) imgProfilePic.getDrawable();
-                Bitmap bitmap = bd.getBitmap();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
-                intent.putExtra("byteArrayImg", baos.toByteArray());
+                if(!imgIsNull) {
+                    intent.putExtra("localImgPath", imgPath);
+                }else{
+                    intent.putExtra("localImgPath", "");
+                }
                 startActivity(intent);
             }else{
                 //username empty

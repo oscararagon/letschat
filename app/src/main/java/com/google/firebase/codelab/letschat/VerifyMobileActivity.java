@@ -61,7 +61,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
     private Intent intent;
     private String mobileNumber;
     private String message = "Your Let's Chat verification code is";
-    private String remoteImgUri;
+    private String remoteImgUri = "";
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
 
     private static final String USERNAME = "username";
@@ -96,43 +96,28 @@ public class VerifyMobileActivity extends AppCompatActivity {
         message = message+" "+randCode;
         verifySMSPermission();
 
-
-        //upload immagine profilo su Cloud Storage
-        byte[] imgData = intent.getByteArrayExtra("byteArrayImg");
-        storageRef = storageRef.child("img"+intent.getStringExtra("mobileNumber")+".jpg");
-        UploadTask uploadTask = storageRef.putBytes(imgData);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                remoteImgUri = remoteImgUri+"/"+taskSnapshot.getMetadata().getPath();
-                sp.edit().putString("profilePic", remoteImgUri);
-            }
-        });
-
-        //Paglia sto provando una cosa da qua in poi
-        /*Uri file = Uri.fromFile(new File(sp.getString("localImgPath", "")));
-        storageRef = storageRef.child("img"+intent.getStringExtra("mobileNumber")+".jpg");
-        UploadTask uploadTask_stream = storageRef.putFile(file);
-        Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    throw task.getException();
+        //upload dell'immagine profile sullo Storage
+        if(!intent.getStringExtra("localImgPath").equals("")){
+            Uri file = Uri.fromFile(new File(intent.getStringExtra("localImgPath")));
+            storageRef = storageRef.child("img"+intent.getStringExtra("mobileNumber")+".jpg");
+            UploadTask uploadTask_stream = storageRef.putFile(file);
+            Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+                    return storageRef.getDownloadUrl();
                 }
-                return storageRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
-                if(task.isSuccessful()){
-                    remoteImgUri = task.getResult().toString();
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if(task.isSuccessful()){
+                        remoteImgUri = task.getResult().toString();
+                    }
                 }
-            }
-        });*/
+            });
+        }
 
         btnVerify.setOnClickListener(new View.OnClickListener() {
 
@@ -167,8 +152,6 @@ public class VerifyMobileActivity extends AppCompatActivity {
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    //controllare la presenza dell'utente nel db
-
 
                                 }
                             });

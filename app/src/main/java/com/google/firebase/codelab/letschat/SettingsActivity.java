@@ -7,36 +7,64 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.google.firebase.codelab.letschat.R.layout.contact_item_layout;
 
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int PERMISSION_REQUEST = 0;
     private static final int RESULT_LOAD_IMAGE = 1;
 
+    private static final String USERNAME = "username";
+    private static final String PROFILE_PIC = "profilePic";
+    private static final String LOGGED = "logged";
+
+
     private SharedPreferences sp;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private Button saveButton, signoutButton;
     private ImageView imgEditProfilePic, imgFullScreen, imgRemoveProfilePic;
     private CircleImageView imgProfilePic;
     private EditText txtUsername;
-    private TextView messagesLogout;
+    private TextView messages;
+    private Map<String, Object> user = new HashMap<>();
+
 
     private String imgPath;
-    private boolean imgIsNull = true;
 
 
     @Override
@@ -51,7 +79,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         imgEditProfilePic = (ImageView) findViewById(R.id.imgEditProfilePic);
         imgRemoveProfilePic = (ImageView) findViewById(R.id.imgRemoveProfilePic);
         txtUsername = (EditText) findViewById(R.id.edit_username);
-        messagesLogout = (TextView) findViewById(R.id.warningLogout);
+        messages = (TextView) findViewById(R.id.warningSave);
 
         saveButton.setOnClickListener(this);
         signoutButton.setOnClickListener(this);
@@ -59,6 +87,24 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         imgRemoveProfilePic.setOnClickListener(this);
         imgProfilePic.setOnClickListener(this);
 
+        //prelevo il numero di telefono dallo SharedPreferences
+        sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
+
+      /*  db.collection("Users").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        for (QueryDocumentSnapshot userDocument : task.getResult()) {
+                            if((userDocument.getString("mobile").equals(sp.getString("mobile", "")))){
+                                imgPath = userDocument.getString("profilePic");
+                            }
+                        }
+                    }
+                });
+        if(!imgPath.equals("")){
+            Glide.with(this).load(imgPath).into(imgProfilePic);
+            imgRemoveProfilePic.setVisibility(View.VISIBLE);
+        }*/
     }
 
     @Override
@@ -68,30 +114,53 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 //salvo modifiche sul db
                 if (txtUsername.getText().toString().isEmpty()){
                     //username empty
-                    messagesLogout.setText(R.string.invalid_username);
-                    messagesLogout.setVisibility(View.VISIBLE);
+                    messages.setText(R.string.invalid_username);
+                    messages.setVisibility(View.VISIBLE);
+                } else {
+                    user.put(USERNAME, txtUsername.getText().toString());
+                    user.put(PROFILE_PIC, imgPath);
+                    //save user on db
+                    db.collection("Users").document(sp.getString("mobile", "")).set(user)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Toast.makeText(SettingsActivity.this, "Your data have been saved correctly!", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                }
+                            });
                 }
 
 
 
             case R.id.sign_out_button:
                 //cosa fare al click del bottone di logout
-                //user.put(LOGGED, false);
+                user.put(LOGGED, false);
+                db.collection("Users").document(sp.getString("mobile", "")).set(user)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(SettingsActivity.this, "Logout successful!", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(SettingsActivity.this, SignInActivity.class);
+                                startActivity(intent);
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                            }
+                        });
                 break;
 
             case R.id.imgEditProfilePic:
                 //edit profile picture
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    } else {
-                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
-                    }
-                }else{
-                    Intent intent = new Intent();
-                    intent.setType("image/*");
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);
-                }
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);
 
                 break;
 
@@ -101,9 +170,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     imgFullScreen.setVisibility(View.VISIBLE);
                     BitmapDrawable drawable = (BitmapDrawable) imgProfilePic.getDrawable();
                     Bitmap bitmap = drawable.getBitmap();
-                    //rotateImage(imgPath, bitmap, null, imgFullScreen);
-                    //salvo l'immagine profilo nelle SharedPreferences
-                    sp.edit().putString("profilePic", imgPath).apply();
+                    SignInActivity.rotateImage(imgPath, bitmap, null, imgFullScreen);
                 }
                 break;
 
@@ -111,8 +178,29 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 //remove profile pic
                 imgProfilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
                 imgRemoveProfilePic.setVisibility(View.GONE);
-                imgIsNull = true;
                 break;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case RESULT_LOAD_IMAGE:
+                if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                    Bitmap bitmap = null;
+                    Uri selectedImage = null;
+                    selectedImage = data.getData();
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    imgPath = SignInActivity.getPath(this, selectedImage);
+
+                    SignInActivity.rotateImage(imgPath, bitmap, imgProfilePic, null);
+                    imgRemoveProfilePic.setVisibility(View.VISIBLE);
+                }
         }
     }
 }

@@ -32,11 +32,6 @@ import java.util.ArrayList;
 
 public class UserAdapter extends ArrayAdapter<Bundle> {
 
-    private String imgUrl;
-
-    private ImageView profilePic;
-
-
     public UserAdapter(@NonNull Context context, int resource, @NonNull ArrayList<Bundle> objects) {
         super(context, resource, objects);
     }
@@ -51,8 +46,7 @@ public class UserAdapter extends ArrayAdapter<Bundle> {
         }
 
         TextView username, mobile;
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final FirebaseStorage imgRef = FirebaseStorage.getInstance();
+        ImageView profilePic;
 
         final Bundle user = getItem(position);
 
@@ -65,33 +59,11 @@ public class UserAdapter extends ArrayAdapter<Bundle> {
         profilePic.setBackgroundResource(0);
 
 
-
-        db.collection("Users").get()
-            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    for (QueryDocumentSnapshot userDocument : task.getResult()) {
-                       StorageReference img = imgRef.getReferenceFromUrl(userDocument.getString("profilePic"));
-                       Task<Uri> t = img.getDownloadUrl();
-                       t.addOnSuccessListener(new OnSuccessListener<Uri>() {
-                           @Override
-                           public void onSuccess(Uri uri) {
-                               imgUrl = uri.toString();
-                           }
-                       });
-                       t.addOnFailureListener(new OnFailureListener() {
-                           @Override
-                           public void onFailure(@NonNull Exception e) {
-                                e.toString();
-                           }
-                       });
-                    }
-                }
-            });
-
-        Glide.with(getContext()).load(imgUrl).diskCacheStrategy(DiskCacheStrategy.ALL.NONE).into(profilePic);
-
-
+        if(user.getString("profilePic").equals("")){ //se l'utente non ha scelto l'immagine profilo, allora carico l'omino
+            profilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
+        }else{
+            Glide.with(getContext()).load(user.getString("profilePic")).into(profilePic);
+        }
         username.setText(user.getString("username"));
         mobile.setText(user.getString("mobile"));
 
