@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -23,13 +24,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,7 +61,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
     private Intent intent;
     private String mobileNumber;
     private String message = "Your Let's Chat verification code is";
-    private String remoteImgUri = "gs://letschat-aacb2.appspot.com";
+    private String remoteImgUri;
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 0;
 
     private static final String USERNAME = "username";
@@ -101,8 +109,30 @@ public class VerifyMobileActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 remoteImgUri = remoteImgUri+"/"+taskSnapshot.getMetadata().getPath();
+                sp.edit().putString("profilePic", remoteImgUri);
             }
         });
+
+        //Paglia sto provando una cosa da qua in poi
+        /*Uri file = Uri.fromFile(new File(sp.getString("localImgPath", "")));
+        storageRef = storageRef.child("img"+intent.getStringExtra("mobileNumber")+".jpg");
+        UploadTask uploadTask_stream = storageRef.putFile(file);
+        Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+                return storageRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if(task.isSuccessful()){
+                    remoteImgUri = task.getResult().toString();
+                }
+            }
+        });*/
 
         btnVerify.setOnClickListener(new View.OnClickListener() {
 
@@ -130,6 +160,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
                                 public void onSuccess(Void aVoid) {
                                     Toast.makeText(VerifyMobileActivity.this, "Welcome "+intent.getStringExtra("username"), Toast.LENGTH_LONG).show();
                                     Intent intent = new Intent(VerifyMobileActivity.this, HomeActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                     startActivity(intent);
                                 }
                             })

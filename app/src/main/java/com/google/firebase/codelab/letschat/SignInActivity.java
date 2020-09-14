@@ -33,11 +33,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -49,31 +47,32 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private SharedPreferences sp;
 
     private Button mSignInButton;
-    private ImageView imgEditProfilePic, imgFullScreen;
+    private ImageView imgEditProfilePic, imgFullScreen, imgRemoveProfilePic;
     private CircleImageView imgProfilePic;
     private EditText txtMobile, txtUsername;
     private TextView messagesLogin;
 
     private String imgPath;
+    private boolean imgIsNull = true;
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-        //recupero lo SharedPreferences per poter poi salvare l'immagine profilo e lo username dell'utente
-        sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
-        //controllo che l'utente con questo cellulare non sia già loggato
-        if(sp.contains("username")){
-            Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
-            startActivity(intent);
-        }
 
+        sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
         // Collega gli oggetti grafici al codice
         mSignInButton = (Button) findViewById(R.id.sign_in_button);
         imgProfilePic = (CircleImageView) findViewById(R.id.profileImage);
         imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
         imgEditProfilePic =  (ImageView) findViewById(R.id.imgEditProfilePic);
+        imgRemoveProfilePic = (ImageView) findViewById(R.id.imgRemoveProfilePic);
         txtMobile = (EditText) findViewById(R.id.mobile);
         txtUsername = (EditText) findViewById(R.id.username);
         messagesLogin = (TextView) findViewById(R.id.warningLogin);
@@ -82,6 +81,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         // Set click listeners
         mSignInButton.setOnClickListener(this);
         imgEditProfilePic.setOnClickListener(this);
+        imgRemoveProfilePic.setOnClickListener(this);
         imgProfilePic.setOnClickListener(this);
 
 
@@ -120,6 +120,13 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     //salvo l'immagine profilo nelle SharedPreferences
                     sp.edit().putString("profilePic", imgPath).apply();
                 }
+                break;
+
+            case R.id.imgRemoveProfilePic:
+                //remove profile pic
+                imgProfilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
+                imgRemoveProfilePic.setVisibility(View.GONE);
+                imgIsNull = true;
                 break;
         }
     }
@@ -167,8 +174,10 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     imgPath = getPath(this, selectedImage);
 
                     rotateImage(imgPath, bitmap, imgProfilePic, null);
+                    imgIsNull = false;
+                    imgRemoveProfilePic.setVisibility(View.VISIBLE);
                     //salvo l'immagine profilo nelle SharedPreferences
-                    sp.edit().putString("profilePic", imgPath).apply();
+                    sp.edit().putString("localImgPath", imgPath).apply();
                 }
         }
     }

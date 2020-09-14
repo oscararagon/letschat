@@ -1,6 +1,8 @@
 package com.google.firebase.codelab.letschat;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,11 +26,20 @@ public class HomeActivity extends AppCompatActivity {
     private ListView chatList;
     private TextView txtEmptyList;
     private ImageView btnAddChat, btnOpenSettings;
+    private SharedPreferences sp;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        //recupero lo SharedPreferences per poter poi salvare l'immagine profilo e lo username dell'utente
+        sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
+        //controllo che l'utente con questo cellulare non sia già loggato
+        if(!sp.contains("username")){
+            Intent intent = new Intent(HomeActivity.this, SignInActivity.class);
+            startActivity(intent);
+        }
 
         getSupportActionBar().hide();
 

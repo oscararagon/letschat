@@ -49,7 +49,7 @@ public class ContactsActivity extends AppCompatActivity {
                                 int totalUsers = 0;
                                 users = new ArrayList<>();
                                 for (QueryDocumentSnapshot userDocument : task.getResult()) {
-                                    if(!(userDocument.getString("mobile").equals(sp.getString("mobileNumber", "")))){
+                                    if(!(userDocument.getString("mobile").equals(sp.getString("mobile", "")))){
                                         Bundle user = new Bundle();
                                         user.putString("profilePic", userDocument.getString("profilePic"));
                                         user.putString("username", userDocument.getString("username"));

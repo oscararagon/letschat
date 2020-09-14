@@ -14,15 +14,15 @@
         android:theme="@style/AppTheme">
         <activity android:name="com.google.firebase.codelab.letschat.ChatActivity"/>
 
-        <activity android:name="com.google.firebase.codelab.letschat.SignInActivity">
+        <activity android:name="com.google.firebase.codelab.letschat.SignInActivity"/>
+
+        <activity android:name="com.google.firebase.codelab.letschat.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.google.firebase.codelab.letschat.HomeActivity" />
 
         <activity android:name="com.google.firebase.codelab.letschat.VerifyMobileActivity" />
 
