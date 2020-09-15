@@ -7,21 +7,28 @@
     <include layout="@layout/toolbar_home"
         android:id="@+id/toolbar_home"/>
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/chatList"/>
 
-        <TextView
-            android:textSize="20sp"
-            android:layout_centerInParent="true"
-            android:text="@string/chat_list_empty"
-            android:id="@+id/listEmpty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
 
+            <TextView
+                android:id="@+id/listEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/chat_list_empty"
+                android:textSize="20sp" />
+        </RelativeLayout>
+
+    </LinearLayout>
 </LinearLayout>
