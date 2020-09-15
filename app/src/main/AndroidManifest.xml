@@ -26,9 +26,11 @@
 
         <activity android:name="com.google.firebase.codelab.letschat.VerifyMobileActivity" />
 
-        <activity android:name="com.google.firebase.codelab.letschat.ContactsActivity" />
+        <activity android:name="com.google.firebase.codelab.letschat.ContactsActivity"
+            android:parentActivityName=".HomeActivity"/>
 
-        <activity android:name="com.google.firebase.codelab.letschat.SettingsActivity" />
+        <activity android:name="com.google.firebase.codelab.letschat.SettingsActivity"
+            android:parentActivityName=".HomeActivity"/>
 
 
     </application>

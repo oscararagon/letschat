@@ -35,13 +35,11 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class VerifyMobileActivity extends AppCompatActivity {
+
 
     private TextView txtVerify, messagesVerify;
     private EditText codeVerification;
@@ -85,12 +83,13 @@ public class VerifyMobileActivity extends AppCompatActivity {
         pBar = (ProgressBar) findViewById(R.id.progress_bar);
         layoutResend = (LinearLayout) findViewById(R.id.layoutResend);
 
+
         txtVerify.append(" "+mobileNumber);
 
         double min = 100000, max = 999999;
         SmsManager smsManager = SmsManager.getDefault();
-        //Creo il codice random a 6 cifre
-        final int randCode = (int) (Math.random() * (max - min + 1) + min);
+        //sendSMSMessage. Prima creo il codice a 6 cifre a random
+        final int randCode = (int) (Math.random() * (max - min +1) + min);
         message = message+" "+randCode;
         verifySMSPermission();
 
@@ -124,7 +123,8 @@ public class VerifyMobileActivity extends AppCompatActivity {
                 pBar.setVisibility(View.VISIBLE);
                 //verifico che il contenuto di codeVerification coincida con il codeNumber mandato per SMS
                 if(codeVerification.getText().toString().equals(String.valueOf(randCode))){
-                    /*aggiungo l'utente al db Firestore. Inoltre salvo lo username in locale per i prossimi accessi*/
+                    /**aggiungo l'utente al db Firestore. Inoltre salvo lo username in locale per i prossimi accessi*/
+
 
                     user = new HashMap<>();
                     user.put(USERNAME, intent.getStringExtra("username"));
@@ -134,6 +134,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
                     user.put(PROFILE_PIC, remoteImgUri);
                     user.put(MOBILE, intent.getStringExtra("mobileNumber"));
                     user.put(LOGGED, true);
+
 
                     //salvataggio utente su db
                     db.collection("Users").document(intent.getStringExtra("mobileNumber")).set(user)
@@ -160,13 +161,14 @@ public class VerifyMobileActivity extends AppCompatActivity {
             }
         });
 
-        //invio nuovamente il messaggio
+        //invio nuovamente il messaggio con il codice di accesso
         layoutResend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SendSMSMessage(mobileNumber, message);
             }
         });
+
     }
 
     private void verifySMSPermission(){

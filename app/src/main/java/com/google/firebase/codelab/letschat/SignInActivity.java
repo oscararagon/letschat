@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -24,17 +23,16 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
+
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-import java.io.ByteArrayOutputStream;
+import com.bumptech.glide.Glide;
+
 import java.io.IOException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -44,7 +42,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private static final int PERMISSION_REQUEST = 0;
     private static final int RESULT_LOAD_IMAGE = 1;
 
-    private SharedPreferences sp; //per salvare in locale i dati degli utenti
+    private SharedPreferences sp;
 
     private Button mSignInButton;
     private ImageView imgEditProfilePic, imgFullScreen, imgRemoveProfilePic;
@@ -63,7 +61,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         //inizializzo SharedPreferences in modalità privata
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
-        // Collego gli oggetti grafici al codice
+        // Collega gli oggetti grafici al codice
         mSignInButton = (Button) findViewById(R.id.sign_in_button);
         imgProfilePic = (CircleImageView) findViewById(R.id.profileImage);
         imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
@@ -73,11 +71,14 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         txtUsername = (EditText) findViewById(R.id.username);
         messagesLogin = (TextView) findViewById(R.id.warningLogin);
 
+
         // Set click listeners
         mSignInButton.setOnClickListener(this);
         imgEditProfilePic.setOnClickListener(this);
         imgRemoveProfilePic.setOnClickListener(this);
         imgProfilePic.setOnClickListener(this);
+
+
     }
 
     @Override
@@ -87,9 +88,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 //cosa fare al click del bottone di login
                 checkLogin(txtMobile.getText().toString(), txtUsername.getText().toString());
                 break;
-
             case R.id.imgEditProfilePic:
                 //edit profile picture con richiesta dei permessi di accesso alla memoria
+
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     } else {
@@ -102,24 +103,23 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     intent.setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);
                 }
+
                 break;
 
             case R.id.profileImage:
                 //mostro a schermo intero l'immagine profilo
-                if(imgPath != null ) {
+
+                if(!imgIsNull) {
                     imgFullScreen.setVisibility(View.VISIBLE);
-                    BitmapDrawable drawable = (BitmapDrawable) imgProfilePic.getDrawable();
-                    Bitmap bitmap = drawable.getBitmap();
-                    /*Android preleva dalla galleria alcune immagini ruotate
-                    Correggiamo la rotazione tramite la funzione rotateImage*/
-                    rotateImage(imgPath, bitmap, null, imgFullScreen);
+                    Glide.with(this).load(imgPath).into(imgFullScreen);
                 }
                 break;
 
             case R.id.imgRemoveProfilePic:
-                //Rimuovo profile pic
+                //remove profile pic
                 imgProfilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
                 imgRemoveProfilePic.setVisibility(View.GONE);
+                imgPath = null;
                 imgIsNull = true;
                 break;
         }
@@ -157,74 +157,14 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         switch (requestCode) {
             case RESULT_LOAD_IMAGE:
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                    Bitmap bitmap = null;
                     Uri selectedImage = null;
                     selectedImage = data.getData();
-                    try {
-                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     imgPath = getPath(this, selectedImage);
 
-                    rotateImage(imgPath, bitmap, imgProfilePic, null);
+                    Glide.with(this).load(imgPath).into(imgProfilePic);
                     imgIsNull = false;
                     imgRemoveProfilePic.setVisibility(View.VISIBLE);
                 }
-        }
-    }
-
-    /*Correggiamo orientazione delle immagini profilo controllando se il "contenitore" è
-    una CircleImageView o una ImageView*/
-    public static void rotateImage(String imgPath, Bitmap bitmap, CircleImageView cImg, ImageView img){
-        try {
-            ExifInterface exif = new ExifInterface(imgPath);
-            String orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-            if(cImg != null) {
-                switch (orientation) {
-                    case "6":
-                        cImg.setImageResource(0);
-                        cImg.setBackgroundResource(0);
-                        cImg.setImageBitmap(bitmap);
-                        cImg.setRotation(90);
-                        break;
-                    case "8":
-                        cImg.setImageResource(0);
-                        cImg.setBackgroundResource(0);
-                        cImg.setImageBitmap(bitmap);
-                        cImg.setRotation(270);
-                        break;
-                    default:
-                        cImg.setRotation(0);
-                        cImg.setImageResource(0);
-                        cImg.setBackgroundResource(0);
-                        cImg.setImageBitmap(bitmap);
-                        break;
-                }
-            }else{
-                switch (orientation) {
-                    case "6":
-                        img.setImageResource(0);
-                        img.setBackgroundResource(0);
-                        img.setImageBitmap(bitmap);
-                        img.setRotation(90);
-                        break;
-                    case "8":
-                        img.setImageResource(0);
-                        img.setBackgroundResource(0);
-                        img.setImageBitmap(bitmap);
-                        img.setRotation(270);
-                        break;
-                    default:
-                        img.setRotation(0);
-                        img.setImageResource(0);
-                        img.setBackgroundResource(0);
-                        img.setImageBitmap(bitmap);
-                        break;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

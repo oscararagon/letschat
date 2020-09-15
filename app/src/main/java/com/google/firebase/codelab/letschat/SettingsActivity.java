@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -32,8 +33,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,24 +50,26 @@ import static com.google.firebase.codelab.letschat.R.layout.contact_item_layout;
 
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final int PERMISSION_REQUEST = 0;
     private static final int RESULT_LOAD_IMAGE = 1;
 
     private static final String USERNAME = "username";
     private static final String PROFILE_PIC = "profilePic";
     private static final String LOGGED = "logged";
 
+
     private SharedPreferences sp;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    private StorageReference storageRef = storage.getReference();
 
     private Button saveButton, signoutButton;
     private ImageView imgEditProfilePic, imgFullScreen, imgRemoveProfilePic;
     private CircleImageView imgProfilePic;
     private EditText txtUsername;
     private TextView messages;
-    private Map<String, Object> user = new HashMap<>();
+    private Map<String, Object> user;
 
-    private String imgPath;
+    private String imgPath = "";
 
 
     @Override
@@ -88,21 +95,19 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         //prelevo il numero di telefono dallo SharedPreferences
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
-        /* db.collection("Users").get()
+        db.collection("Users").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         for (QueryDocumentSnapshot userDocument : task.getResult()) {
                             if((userDocument.getString("mobile").equals(sp.getString("mobile", "")))){
                                 imgPath = userDocument.getString("profilePic");
+                                Glide.with(SettingsActivity.this).load(imgPath).into(imgProfilePic);
+                                imgRemoveProfilePic.setVisibility(View.VISIBLE);
                             }
                         }
                     }
                 });
-        if(!imgPath.equals("")){
-            Glide.with(this).load(imgPath).into(imgProfilePic);
-            imgRemoveProfilePic.setVisibility(View.VISIBLE);
-        }*/
     }
 
     @Override
@@ -115,10 +120,13 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     messages.setText(R.string.invalid_username);
                     messages.setVisibility(View.VISIBLE);
                 } else {
+                    //update data of the user
+                    user = new HashMap<>();
                     user.put(USERNAME, txtUsername.getText().toString());
                     user.put(PROFILE_PIC, imgPath);
-                    //save user on db
-                    db.collection("Users").document(sp.getString("mobile", "")).set(user)
+                    //update user document in db
+                    db.collection("Users").document(sp.getString("mobile", ""))
+                            .update(user)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
@@ -128,6 +136,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(SettingsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                                 }
                             });
                 }
@@ -135,19 +144,19 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
             case R.id.sign_out_button:
                 //cosa fare al click del bottone di logout
-                user.put(LOGGED, false);
-                db.collection("Users").document(sp.getString("mobile", "")).set(user)
+
+                db.collection("Users").document(sp.getString("mobile", ""))
+                        .update("logged", false)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Toast.makeText(SettingsActivity.this, "Logout successful!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(SettingsActivity.this, SignInActivity.class);
-                                startActivity(intent);
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(SettingsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
@@ -162,17 +171,16 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
             case R.id.profileImage:
                 //show profile picture
-                if(imgPath != null) {
+                if(imgPath != "") {
                     imgFullScreen.setVisibility(View.VISIBLE);
-                    BitmapDrawable drawable = (BitmapDrawable) imgProfilePic.getDrawable();
-                    Bitmap bitmap = drawable.getBitmap();
-                    SignInActivity.rotateImage(imgPath, bitmap, null, imgFullScreen);
+                    Glide.with(this).load(imgPath).into(imgFullScreen);
                 }
                 break;
 
             case R.id.imgRemoveProfilePic:
-                //remove profile pic
+                //remove profile picture
                 imgProfilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
+                imgPath = "";
                 imgRemoveProfilePic.setVisibility(View.GONE);
                 break;
         }
@@ -184,19 +192,43 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         switch (requestCode) {
             case RESULT_LOAD_IMAGE:
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-                    Bitmap bitmap = null;
                     Uri selectedImage = null;
                     selectedImage = data.getData();
-                    try {
-                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     imgPath = SignInActivity.getPath(this, selectedImage);
-
-                    SignInActivity.rotateImage(imgPath, bitmap, imgProfilePic, null);
+                    Glide.with(this).load(imgPath).into(imgProfilePic);
+                    //upload immagine sul server dopo che l'utente l'ha modificata
+                    Uri file = Uri.fromFile(new File(imgPath));
+                    storageRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
+                    UploadTask uploadTask_stream = storageRef.putFile(file);
+                    Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return storageRef.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if(task.isSuccessful()){
+                                imgPath = task.getResult().toString();
+                            }
+                        }
+                    });
                     imgRemoveProfilePic.setVisibility(View.VISIBLE);
                 }
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        if(imgFullScreen.getVisibility() == View.VISIBLE){
+            imgFullScreen.setImageDrawable(null);
+            imgFullScreen.setVisibility(View.GONE);
+        }else{
+            super.onBackPressed();
+        }
+    }
+
 }

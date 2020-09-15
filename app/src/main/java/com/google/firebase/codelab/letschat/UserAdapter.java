@@ -16,18 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.gms.auth.api.accounttransfer.zzu;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
 import java.util.ArrayList;
 
 public class UserAdapter extends ArrayAdapter<Bundle> {
@@ -57,7 +45,8 @@ public class UserAdapter extends ArrayAdapter<Bundle> {
         profilePic.setImageResource(0);
         profilePic.setBackgroundResource(0);
 
-        //se l'utente non ha scelto l'immagine profilo carico l'icona dell'omino
+
+        //se l'utente non ha scelto l'immagine profilo, allora carico l'omino
         if(user.getString("profilePic").equals("")){
             profilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
         }else{
