@@ -50,7 +50,6 @@ public class UserAdapter extends ArrayAdapter<Bundle> {
 
         final Bundle user = getItem(position);
 
-
         profilePic = (ImageView) convertView.findViewById(R.id.item_profile_photo);
         username = (TextView) convertView.findViewById(R.id.item_username);
         mobile = (TextView) convertView.findViewById(R.id.item_mobileNumber);
@@ -58,8 +57,8 @@ public class UserAdapter extends ArrayAdapter<Bundle> {
         profilePic.setImageResource(0);
         profilePic.setBackgroundResource(0);
 
-
-        if(user.getString("profilePic").equals("")){ //se l'utente non ha scelto l'immagine profilo, allora carico l'omino
+        //se l'utente non ha scelto l'immagine profilo carico l'icona dell'omino
+        if(user.getString("profilePic").equals("")){
             profilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
         }else{
             Glide.with(getContext()).load(user.getString("profilePic")).into(profilePic);

@@ -44,7 +44,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private static final int PERMISSION_REQUEST = 0;
     private static final int RESULT_LOAD_IMAGE = 1;
 
-    private SharedPreferences sp;
+    private SharedPreferences sp; //per salvare in locale i dati degli utenti
 
     private Button mSignInButton;
     private ImageView imgEditProfilePic, imgFullScreen, imgRemoveProfilePic;
@@ -52,8 +52,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private EditText txtMobile, txtUsername;
     private TextView messagesLogin;
 
-    private String imgPath;
-    private boolean imgIsNull = true;
+    private String imgPath; //percorso locale dell'immagine profilo
+    private boolean imgIsNull = true; //per verificare se è stata scelta o meno un'immagine profilo
 
 
     @Override
@@ -61,9 +61,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-
+        //inizializzo SharedPreferences in modalità privata
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
-        // Collega gli oggetti grafici al codice
+        // Collego gli oggetti grafici al codice
         mSignInButton = (Button) findViewById(R.id.sign_in_button);
         imgProfilePic = (CircleImageView) findViewById(R.id.profileImage);
         imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
@@ -73,14 +73,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         txtUsername = (EditText) findViewById(R.id.username);
         messagesLogin = (TextView) findViewById(R.id.warningLogin);
 
-
         // Set click listeners
         mSignInButton.setOnClickListener(this);
         imgEditProfilePic.setOnClickListener(this);
         imgRemoveProfilePic.setOnClickListener(this);
         imgProfilePic.setOnClickListener(this);
-
-
     }
 
     @Override
@@ -90,34 +87,37 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 //cosa fare al click del bottone di login
                 checkLogin(txtMobile.getText().toString(), txtUsername.getText().toString());
                 break;
+
             case R.id.imgEditProfilePic:
-                //edit profile picture
+                //edit profile picture con richiesta dei permessi di accesso alla memoria
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     } else {
                         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
                     }
                 }else{
+                    //Nuovo intent per scegliere immagine profilo dalla galleria
                     Intent intent = new Intent();
                     intent.setType("image/*");
                     intent.setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);
                 }
-
                 break;
 
             case R.id.profileImage:
-                //show profile picture
+                //mostro a schermo intero l'immagine profilo
                 if(imgPath != null ) {
                     imgFullScreen.setVisibility(View.VISIBLE);
                     BitmapDrawable drawable = (BitmapDrawable) imgProfilePic.getDrawable();
                     Bitmap bitmap = drawable.getBitmap();
+                    /*Android preleva dalla galleria alcune immagini ruotate
+                    Correggiamo la rotazione tramite la funzione rotateImage*/
                     rotateImage(imgPath, bitmap, null, imgFullScreen);
                 }
                 break;
 
             case R.id.imgRemoveProfilePic:
-                //remove profile pic
+                //Rimuovo profile pic
                 imgProfilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
                 imgRemoveProfilePic.setVisibility(View.GONE);
                 imgIsNull = true;
@@ -174,8 +174,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    /*Correggiamo orientazione delle immagini profilo controllando se il "contenitore" è
+    una CircleImageView o una ImageView*/
     public static void rotateImage(String imgPath, Bitmap bitmap, CircleImageView cImg, ImageView img){
-
         try {
             ExifInterface exif = new ExifInterface(imgPath);
             String orientation = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
@@ -345,6 +346,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    //Controllo che i campi del login siano stati riempiti correttamente
     public void checkLogin(String mobile, String user){
         String regex = "^\\d{10}$"; //regex per il numero di cellulare: controlla che abbia 10 cifre
         if(mobile.matches(regex)){

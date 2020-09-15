@@ -52,7 +52,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     private static final String PROFILE_PIC = "profilePic";
     private static final String LOGGED = "logged";
 
-
     private SharedPreferences sp;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -62,7 +61,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     private EditText txtUsername;
     private TextView messages;
     private Map<String, Object> user = new HashMap<>();
-
 
     private String imgPath;
 
@@ -90,7 +88,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         //prelevo il numero di telefono dallo SharedPreferences
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
-      /*  db.collection("Users").get()
+        /* db.collection("Users").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -133,8 +131,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                                 }
                             });
                 }
-
-
+                break;
 
             case R.id.sign_out_button:
                 //cosa fare al click del bottone di logout
@@ -161,7 +158,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);
-
                 break;
 
             case R.id.profileImage:
