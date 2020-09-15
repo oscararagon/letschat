@@ -1,11 +1,16 @@
 
 package com.google.firebase.codelab.letschat;
 
+import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
@@ -20,52 +25,31 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String TAG = "ChatActivity";
-    public static final String MESSAGES_CHILD = "messages";
-    private static final int REQUEST_INVITE = 1;
-    private static final int REQUEST_IMAGE = 2;
-    private static final String LOADING_IMAGE_URL = "https://www.google.com/images/spin-32.gif";
-    public static final int DEFAULT_MSG_LENGTH_LIMIT = 10;
-    public static final String ANONYMOUS = "anonymous";
-    private static final String MESSAGE_SENT_EVENT = "message_sent";
-    private String mUsername;
-    private String mPhotoUrl;
-    private SharedPreferences mSharedPreferences;
-    private static final String MESSAGE_URL = "http://friendlychat.firebase.google.com/message/";
-
-    private Button mSendButton;
-    private RecyclerView mMessageRecyclerView;
-    private LinearLayoutManager mLinearLayoutManager;
-    private ProgressBar mProgressBar;
-    private EditText mMessageEditText;
-    private ImageView mAddMessageImageView;
-
-    // Firebase instance variables
+    private Button SendButton;
+    private EditText MessageEditText;
+    private ImageView AddImage;
+    private ImageView AddDocument;
+    private CircleImageView ImgContact;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // Set default username is anonymous.
-        mUsername = ANONYMOUS;
 
-        // Initialize ProgressBar and RecyclerView.
-        mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
-        mLinearLayoutManager = new LinearLayoutManager(this);
-        mLinearLayoutManager.setStackFromEnd(true);
-        mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
+        SendButton = (Button) findViewById(R.id.sendButton);
+        MessageEditText = (EditText) findViewById(R.id.messageEditText);
+        AddDocument = (ImageView) findViewById(R.id.addDocument);
+        AddImage = (ImageView) findViewById(R.id.addImage);
+        ImgContact = (CircleImageView) findViewById(R.id.imgContact);
 
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-
-        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
-        mMessageEditText.addTextChangedListener(new TextWatcher() {
+        MessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -73,9 +57,9 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.toString().trim().length() > 0) {
-                    mSendButton.setEnabled(true);
+                    SendButton.setEnabled(true);
                 } else {
-                    mSendButton.setEnabled(false);
+                    SendButton.setEnabled(false);
                 }
             }
 
@@ -84,20 +68,35 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        mSendButton = (Button) findViewById(R.id.sendButton);
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Send messages on click.
-            }
-        });
+        SendButton.setOnClickListener(this);
+        AddImage.setOnClickListener(this);
+        AddDocument.setOnClickListener(this);
+        ImgContact.setOnClickListener(this);
+    }
 
-        mAddMessageImageView = (ImageView) findViewById(R.id.addImage);
-        mAddMessageImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Select image for image message on click.
-            }
-        });
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.sendButton:
+
+
+                break;
+
+            case R.id.addImage:
+                //Nuovo intent per scegliere immagine dalla galleria
+                /*Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);*/
+                break;
+
+            case R.id.addDocument:
+
+                break;
+
+            case R.id.imgContact:
+
+                break;
+        }
     }
 }

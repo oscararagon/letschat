@@ -40,7 +40,6 @@ import java.util.Map;
 
 public class VerifyMobileActivity extends AppCompatActivity {
 
-
     private TextView txtVerify, messagesVerify;
     private EditText codeVerification;
     private Button btnVerify;
@@ -83,7 +82,6 @@ public class VerifyMobileActivity extends AppCompatActivity {
         pBar = (ProgressBar) findViewById(R.id.progress_bar);
         layoutResend = (LinearLayout) findViewById(R.id.layoutResend);
 
-
         txtVerify.append(" "+mobileNumber);
 
         double min = 100000, max = 999999;
@@ -124,7 +122,6 @@ public class VerifyMobileActivity extends AppCompatActivity {
                 //verifico che il contenuto di codeVerification coincida con il codeNumber mandato per SMS
                 if(codeVerification.getText().toString().equals(String.valueOf(randCode))){
                     /**aggiungo l'utente al db Firestore. Inoltre salvo lo username in locale per i prossimi accessi*/
-
 
                     user = new HashMap<>();
                     user.put(USERNAME, intent.getStringExtra("username"));

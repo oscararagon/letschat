@@ -10,7 +10,7 @@
     android:padding="10dp">
 
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:layout_marginRight="10dp"
         android:id="@+id/imgContact"
         android:layout_width="53dp"

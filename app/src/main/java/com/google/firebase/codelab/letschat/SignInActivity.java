@@ -77,8 +77,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         imgEditProfilePic.setOnClickListener(this);
         imgRemoveProfilePic.setOnClickListener(this);
         imgProfilePic.setOnClickListener(this);
-
-
     }
 
     @Override
@@ -88,6 +86,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 //cosa fare al click del bottone di login
                 checkLogin(txtMobile.getText().toString(), txtUsername.getText().toString());
                 break;
+
             case R.id.imgEditProfilePic:
                 //edit profile picture con richiesta dei permessi di accesso alla memoria
 
@@ -103,7 +102,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     intent.setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);
                 }
-
                 break;
 
             case R.id.profileImage:

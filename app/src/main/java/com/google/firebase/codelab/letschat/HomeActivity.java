@@ -35,6 +35,7 @@ public class HomeActivity extends AppCompatActivity {
 
         //recupero lo SharedPreferences per poter poi salvare l'immagine profilo e lo username dell'utente
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
+
         //controllo che l'utente con questo cellulare non sia già loggato
         if(!sp.contains("username")){
             Intent intent = new Intent(HomeActivity.this, SignInActivity.class);
