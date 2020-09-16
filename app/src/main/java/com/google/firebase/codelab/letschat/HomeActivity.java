@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,7 +26,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private ListView chatList;
     private TextView txtEmptyList;
-    private ImageView btnAddChat, btnOpenSettings;
+    private ImageView btnAddChat, btnOpenSettings, btnRemoveChat;
     private SharedPreferences sp;
 
     @Override
@@ -48,6 +49,7 @@ public class HomeActivity extends AppCompatActivity {
         txtEmptyList = (TextView) findViewById(R.id.listEmpty);
         btnAddChat = (ImageView) findViewById(R.id.btnAddChat);
         btnOpenSettings = (ImageView) findViewById(R.id.btnMenu);
+        btnRemoveChat = (ImageView) findViewById(R.id.btnDeleteChat);
 
         chatList.setEmptyView(txtEmptyList);
 
@@ -59,6 +61,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+
         //se c'è almeno una chat bisogna far scomparire la scritta Let's add a new chat
 
 
@@ -69,5 +72,15 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        /*chatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                btnAddChat.setVisibility(view.GONE);
+                btnOpenSettings.setVisibility(view.GONE);
+                btnRemoveChat.setVisibility(view.VISIBLE);
+                return false;
+            }
+        });*/
     }
 }

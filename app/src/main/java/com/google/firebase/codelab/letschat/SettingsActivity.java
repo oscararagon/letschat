@@ -68,7 +68,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
     private String imgPath = "";
     private String localImgPath;
-    private boolean saved = false;
+    private boolean saved = false; //per capire se le modifiche sono state salvate
 
 
     @Override
@@ -76,7 +76,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-         actionBar = getSupportActionBar();
+        actionBar = getSupportActionBar();
 
         saveButton = (Button) findViewById(R.id.save_button);
         signoutButton = (Button) findViewById(R.id.sign_out_button);
@@ -153,7 +153,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
             case R.id.sign_out_button:
                 //cosa fare al click del bottone di logout
-
                 db.collection("Users").document(sp.getString("mobile", ""))
                         .update(LOGGED, false)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
