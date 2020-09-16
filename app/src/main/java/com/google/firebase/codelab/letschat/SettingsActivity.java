@@ -37,16 +37,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.google.firebase.codelab.letschat.R.layout.contact_item_layout;
 
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -120,10 +116,46 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     messages.setText(R.string.invalid_username);
                     messages.setVisibility(View.VISIBLE);
                 } else {
+                    //cancello la vecchia immagine prima di fare l'upload
+                    storageRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
+                    storageRef.delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    String prova = "fatto";
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(SettingsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    //upload immagine sul server dopo che l'utente l'ha modificata
+                    Uri file = Uri.fromFile(new File(imgPath));
+                    UploadTask uploadTask_stream = storageRef.putFile(file);
+                    Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return storageRef.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if(task.isSuccessful()){
+                                imgPath = task.getResult().toString();
+                            }
+                        }
+                    });
+
                     //update data of the user
                     user = new HashMap<>();
                     user.put(USERNAME, txtUsername.getText().toString());
                     user.put(PROFILE_PIC, imgPath);
+
                     //update user document in db
                     db.collection("Users").document(sp.getString("mobile", ""))
                             .update(user)
@@ -150,7 +182,12 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
+                                //al logout pulisco tutti i dati dell'utente salvati in locale nello SharedPreferences
+                                sp.edit().clear().apply();
                                 Toast.makeText(SettingsActivity.this, "Logout successful!", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(SettingsActivity.this, SignInActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -196,26 +233,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     selectedImage = data.getData();
                     imgPath = SignInActivity.getPath(this, selectedImage);
                     Glide.with(this).load(imgPath).into(imgProfilePic);
-                    //upload immagine sul server dopo che l'utente l'ha modificata
-                    Uri file = Uri.fromFile(new File(imgPath));
-                    storageRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
-                    UploadTask uploadTask_stream = storageRef.putFile(file);
-                    Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                        @Override
-                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
-                            }
-                            return storageRef.getDownloadUrl();
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if(task.isSuccessful()){
-                                imgPath = task.getResult().toString();
-                            }
-                        }
-                    });
                     imgRemoveProfilePic.setVisibility(View.VISIBLE);
                 }
         }

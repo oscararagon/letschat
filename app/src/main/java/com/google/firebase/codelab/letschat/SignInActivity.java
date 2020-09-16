@@ -33,8 +33,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
-import java.io.IOException;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SignInActivity extends AppCompatActivity implements View.OnClickListener {
@@ -158,7 +156,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     Uri selectedImage = null;
                     selectedImage = data.getData();
                     imgPath = getPath(this, selectedImage);
-
                     Glide.with(this).load(imgPath).into(imgProfilePic);
                     imgIsNull = false;
                     imgRemoveProfilePic.setVisibility(View.VISIBLE);
