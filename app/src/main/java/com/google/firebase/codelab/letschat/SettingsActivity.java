@@ -54,9 +54,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
 
     private SharedPreferences sp;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseStorage storage = FirebaseStorage.getInstance();
-    private StorageReference storageRef = storage.getReference();
+    private FirebaseFirestore db;
+    private StorageReference storageRef;
 
     private Button saveButton, signoutButton;
     private ImageView imgEditProfilePic, imgFullScreen, imgRemoveProfilePic;
@@ -88,6 +87,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         imgRemoveProfilePic.setOnClickListener(this);
         imgProfilePic.setOnClickListener(this);
 
+        db = FirebaseFirestore.getInstance();
+        storageRef = FirebaseStorage.getInstance().getReference();
+
         //prelevo il numero di telefono dallo SharedPreferences
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
@@ -117,8 +119,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     messages.setVisibility(View.VISIBLE);
                 } else {
                     //cancello la vecchia immagine prima di fare l'upload
-                    storageRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
-                    storageRef.delete()
+                   /* final StorageReference fileRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
+                    fileRef.delete()
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
@@ -129,27 +131,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(SettingsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                         }
-                    });
-
-                    //upload immagine sul server dopo che l'utente l'ha modificata
-                    Uri file = Uri.fromFile(new File(imgPath));
-                    UploadTask uploadTask_stream = storageRef.putFile(file);
-                    Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                        @Override
-                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
-                            }
-                            return storageRef.getDownloadUrl();
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if(task.isSuccessful()){
-                                imgPath = task.getResult().toString();
-                            }
-                        }
-                    });
+                    });*/
 
                     //update data of the user
                     user = new HashMap<>();
@@ -234,6 +216,29 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     imgPath = SignInActivity.getPath(this, selectedImage);
                     Glide.with(this).load(imgPath).into(imgProfilePic);
                     imgRemoveProfilePic.setVisibility(View.VISIBLE);
+                    saveButton.setEnabled(false);
+
+                    //upload immagine sul server dopo che l'utente l'ha modificata
+                    final StorageReference fileRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
+                    Uri file = Uri.fromFile(new File(imgPath));
+                    UploadTask uploadTask_stream = fileRef.putFile(file);
+                    Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return fileRef.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if(task.isSuccessful()){
+                                imgPath = task.getResult().toString();
+                                saveButton.setEnabled(true);
+                            }
+                        }
+                    });
                 }
         }
     }

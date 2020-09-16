@@ -47,8 +47,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
     private ProgressBar pBar;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseStorage storage = FirebaseStorage.getInstance();
-    private StorageReference storageRef = storage.getReference();
+    private StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
     private Map<String, Object> user;
 
@@ -94,15 +93,15 @@ public class VerifyMobileActivity extends AppCompatActivity {
         //upload dell'immagine profile sullo Storage
         if(!intent.getStringExtra("localImgPath").equals("")){
             Uri file = Uri.fromFile(new File(intent.getStringExtra("localImgPath")));
-            storageRef = storageRef.child("img"+intent.getStringExtra("mobileNumber")+".jpg");
-            UploadTask uploadTask_stream = storageRef.putFile(file);
+            final StorageReference fileRef = storageRef.child("img"+intent.getStringExtra("mobileNumber")+".jpg");
+            UploadTask uploadTask_stream = fileRef.putFile(file);
             Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
                 public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                     if (!task.isSuccessful()) {
                         throw task.getException();
                     }
-                    return storageRef.getDownloadUrl();
+                    return fileRef.getDownloadUrl();
                 }
             }).addOnCompleteListener(new OnCompleteListener<Uri>() {
                 @Override
