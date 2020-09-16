@@ -93,6 +93,7 @@ public class VerifyMobileActivity extends AppCompatActivity {
         //upload dell'immagine profile sullo Storage
         if(!intent.getStringExtra("localImgPath").equals("")){
             Uri file = Uri.fromFile(new File(intent.getStringExtra("localImgPath")));
+
             final StorageReference fileRef = storageRef.child("img"+intent.getStringExtra("mobileNumber")+".jpg");
             UploadTask uploadTask_stream = fileRef.putFile(file);
             Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
@@ -131,6 +132,8 @@ public class VerifyMobileActivity extends AppCompatActivity {
                     user.put(MOBILE, intent.getStringExtra("mobileNumber"));
                     user.put(LOGGED, true);
 
+                    //salvo sullo SharedPreferences il path locale dell'immagine profilo
+                    sp.edit().putString("lastProfilePic", intent.getStringExtra("localImgPath")).apply();
 
                     //salvataggio utente su db
                     db.collection("Users").document(intent.getStringExtra("mobileNumber")).set(user)

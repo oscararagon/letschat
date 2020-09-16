@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -57,6 +58,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     private FirebaseFirestore db;
     private StorageReference storageRef;
 
+    private ActionBar actionBar;
     private Button saveButton, signoutButton;
     private ImageView imgEditProfilePic, imgFullScreen, imgRemoveProfilePic;
     private CircleImageView imgProfilePic;
@@ -65,12 +67,16 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     private Map<String, Object> user;
 
     private String imgPath = "";
+    private String localImgPath;
+    private boolean saved = false;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+         actionBar = getSupportActionBar();
 
         saveButton = (Button) findViewById(R.id.save_button);
         signoutButton = (Button) findViewById(R.id.sign_out_button);
@@ -90,7 +96,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         db = FirebaseFirestore.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference();
 
-        //prelevo il numero di telefono dallo SharedPreferences
+        //prelevo il numero di telefono dallo SharedPreferences e l'ultima immagine del profilo settata
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
         db.collection("Users").get()
@@ -118,25 +124,13 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     messages.setText(R.string.invalid_username);
                     messages.setVisibility(View.VISIBLE);
                 } else {
-                    //cancello la vecchia immagine prima di fare l'upload
-                   /* final StorageReference fileRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
-                    fileRef.delete()
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    String prova = "fatto";
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(SettingsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
-                        }
-                    });*/
-
                     //update data of the user
                     user = new HashMap<>();
                     user.put(USERNAME, txtUsername.getText().toString());
                     user.put(PROFILE_PIC, imgPath);
+
+                    //aggiorno il campo lastProfilePic dello sharedpreferences
+                    sp.edit().putString("lastProfilePic", localImgPath).apply();
 
                     //update user document in db
                     db.collection("Users").document(sp.getString("mobile", ""))
@@ -145,6 +139,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Toast.makeText(SettingsActivity.this, "Your data have been saved correctly!", Toast.LENGTH_SHORT).show();
+                                    saved = true;
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -160,7 +155,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 //cosa fare al click del bottone di logout
 
                 db.collection("Users").document(sp.getString("mobile", ""))
-                        .update("logged", false)
+                        .update(LOGGED, false)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -193,6 +188,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 if(imgPath != "") {
                     imgFullScreen.setVisibility(View.VISIBLE);
                     Glide.with(this).load(imgPath).into(imgFullScreen);
+                    if(actionBar != null){
+                        actionBar.setDisplayHomeAsUpEnabled(false);
+                    }
                 }
                 break;
 
@@ -213,14 +211,14 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                     Uri selectedImage = null;
                     selectedImage = data.getData();
-                    imgPath = SignInActivity.getPath(this, selectedImage);
-                    Glide.with(this).load(imgPath).into(imgProfilePic);
+                    localImgPath = SignInActivity.getPath(this, selectedImage);
+                    Glide.with(this).load(localImgPath).into(imgProfilePic);
                     imgRemoveProfilePic.setVisibility(View.VISIBLE);
                     saveButton.setEnabled(false);
 
                     //upload immagine sul server dopo che l'utente l'ha modificata
                     final StorageReference fileRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
-                    Uri file = Uri.fromFile(new File(imgPath));
+                    Uri file = Uri.fromFile(new File(localImgPath));
                     UploadTask uploadTask_stream = fileRef.putFile(file);
                     Task<Uri> urlTask = uploadTask_stream.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                         @Override
@@ -236,6 +234,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                             if(task.isSuccessful()){
                                 imgPath = task.getResult().toString();
                                 saveButton.setEnabled(true);
+                                saved = false;
                             }
                         }
                     });
@@ -248,8 +247,28 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         if(imgFullScreen.getVisibility() == View.VISIBLE){
             imgFullScreen.setImageDrawable(null);
             imgFullScreen.setVisibility(View.GONE);
-        }else{
+            if(actionBar != null){
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
+        }else if(!saved){
+            //se l'utente preme il tasto indietro senza salvare, devo sostituire l'immagine profilo con quella vecchia
+            localImgPath = sp.getString("lastProfilePic", "");
+            //upload sullo storage dell'immagine profilo vecchia
+            Uri file = Uri.fromFile(new File(localImgPath));
+            final StorageReference fileRef = storageRef.child("img"+sp.getString("mobile", "")+".jpg");
+            UploadTask uploadTask = fileRef.putFile(file);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Toast.makeText(SettingsActivity.this, "Sei uscito senza salvare\nReimpostata la vecchia immagine profilo", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }else
             super.onBackPressed();
-        }
     }
 }
