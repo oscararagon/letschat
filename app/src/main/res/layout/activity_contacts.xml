@@ -3,7 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <EditText
+        android:id="@+id/searchBar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="Search"
+        android:layout_marginHorizontal="5dp"/>
+
     <ListView
+        android:layout_below="@id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/contactList"/>

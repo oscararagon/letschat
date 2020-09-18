@@ -90,7 +90,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        private String
+        //private String
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
