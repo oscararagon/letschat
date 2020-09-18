@@ -124,6 +124,27 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                     user.put(USERNAME, txtUsername.getText().toString());
                     user.put(PROFILE_PIC, imgPath);
 
+
+
+                    //se l'immagine scelta è vuota e non ne ho una precedente, cancello immagine precedente dallo Storage
+                    if(imgPath.equals("") && !sp.getString("lastProfilePic", "").equals("")){
+                        storageRef.child("img"+sp.getString("mobile", "")+".jpg")
+                                .delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(SettingsActivity.this, "", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+                    }
+
                     //aggiorno il campo lastProfilePic dello sharedpreferences
                     sp.edit().putString("lastProfilePic", localImgPath).apply();
 
@@ -193,6 +214,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 //remove profile picture
                 imgProfilePic.setImageResource(R.drawable.ic_baseline_account_circle_24);
                 imgPath = "";
+                localImgPath = "";
                 imgRemoveProfilePic.setVisibility(View.GONE);
                 break;
         }

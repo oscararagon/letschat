@@ -69,6 +69,9 @@ public class ContactsActivity extends AppCompatActivity {
                             txtEmptyList.setVisibility(View.VISIBLE);
                             //contactList.setEmptyView(txtEmptyList);
                         }else {
+                            //ordinare gli utenti per username
+
+
                             UserAdapter adapter = new UserAdapter(ContactsActivity.this, contact_item_layout, users);
                             contactList.setAdapter(adapter);
                         }
@@ -78,6 +81,10 @@ public class ContactsActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                intent.putExtra("profilePicReceiver", users.get(position).getString("profilePic"));
+                intent.putExtra("usernameReceiver", users.get(position).getString("username"));
+                intent.putExtra("mobileReceiver", users.get(position).getString("mobile"));
+                startActivity(intent);
             }
         });
     }

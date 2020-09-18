@@ -16,6 +16,7 @@
         android:layout_width="53dp"
         android:layout_height="53dp"
         android:layout_gravity="center_vertical"
+        app:civ_border_width="2dp"
         android:src="@drawable/ic_account_circle_black_36dp" />
 
     <LinearLayout

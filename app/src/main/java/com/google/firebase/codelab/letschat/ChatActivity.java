@@ -2,12 +2,15 @@
 package com.google.firebase.codelab.letschat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -24,9 +27,19 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.w3c.dom.Text;
+
+import java.sql.Time;
+import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -37,17 +50,40 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView AddImage;
     private ImageView AddDocument;
     private CircleImageView ImgContact;
+    private TextView username, mobileNumber;
+
+    private Intent intent;
+    private SharedPreferences sp;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        getSupportActionBar().hide();
+
         SendButton = (Button) findViewById(R.id.sendButton);
         MessageEditText = (EditText) findViewById(R.id.messageEditText);
         AddDocument = (ImageView) findViewById(R.id.addDocument);
         AddImage = (ImageView) findViewById(R.id.addImage);
         ImgContact = (CircleImageView) findViewById(R.id.imgContact);
+        username = (TextView) findViewById(R.id.contactName);
+        mobileNumber = (TextView) findViewById(R.id.item_mobileNumber);
+
+        intent = getIntent();
+
+        sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
+
+        if(intent != null){
+            username.setText(intent.getStringExtra("usernameReceiver"));
+            mobileNumber.setText(intent.getStringExtra("mobileReceiver"));
+            if(intent.getStringExtra("profilePicReceiver").equals("")){
+                ImgContact.setImageResource(R.drawable.ic_account_circle_black_36dp);
+            }else
+                Glide.with(this).load(intent.getStringExtra("profilePicReceiver")).into(ImgContact);
+        }
+
 
         MessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -78,8 +114,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sendButton:
-
-
+                //invia il messaggio
+                sendMessage(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"), MessageEditText.getText().toString(), System.nanoTime());
                 break;
 
             case R.id.addImage:
@@ -98,5 +134,41 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
         }
+    }
+
+    private void sendMessage(String sender, String receiver, String msg, final long nanoTime) {
+
+        HashMap<String, Object> message = new HashMap<>();
+
+        message.put("sender", sender);
+        message.put("receiver", receiver);
+        message.put("message", msg);
+
+
+        db.collection("Chats").document(sender+""+receiver)
+                .collection("Messages").document(String.valueOf(nanoTime)).set(message)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(ChatActivity.this, String.valueOf(nanoTime), Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+    }
+
+    /**
+     * metodo che viene chiamato all'apertura dell'activity
+     * per prelevare tutti i messaggi della chat tra sender e receiver
+     *
+     * Viene chiamato all'onCreate
+     * **/
+
+    private void readMessages(){
+
     }
 }

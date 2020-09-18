@@ -20,6 +20,7 @@
         android:layout_above="@+id/linearLayout" />
 
     <LinearLayout
+        android:layout_margin="5dp"
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,6 +29,7 @@
         <EditText
             android:id="@+id/messageEditText"
             android:layout_width="0dp"
+            android:hint="Type a message"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"/>
