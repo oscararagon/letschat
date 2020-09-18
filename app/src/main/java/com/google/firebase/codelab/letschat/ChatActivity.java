@@ -31,15 +31,23 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.w3c.dom.Text;
 
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -51,10 +59,18 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView AddDocument;
     private CircleImageView ImgContact;
     private TextView username, mobileNumber;
+    private RecyclerView recyclerView;
+
+    private MessageAdapter messageAdapter;
+
+    private List<FriendlyMessage> mChat;
+    private boolean Chatfound;
+    private String chatCollectionId;
 
     private Intent intent;
     private SharedPreferences sp;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference chatCollection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +86,17 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         ImgContact = (CircleImageView) findViewById(R.id.imgContact);
         username = (TextView) findViewById(R.id.contactName);
         mobileNumber = (TextView) findViewById(R.id.item_mobileNumber);
+        recyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
 
         intent = getIntent();
 
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
+
+        getChatCollection(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"));
 
         if(intent != null){
             username.setText(intent.getStringExtra("usernameReceiver"));
@@ -83,7 +106,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             }else
                 Glide.with(this).load(intent.getStringExtra("profilePicReceiver")).into(ImgContact);
         }
-
 
         MessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -144,13 +166,19 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         message.put("receiver", receiver);
         message.put("message", msg);
 
+        HashMap<String, Object> lastMessage = new HashMap<>();
+        lastMessage.put("lastMessage", msg);
 
-        db.collection("Chats").document(sender+""+receiver)
-                .collection("Messages").document(String.valueOf(nanoTime)).set(message)
+        if(!Chatfound)
+            chatCollectionId = sender + "" + receiver;
+
+        db.collection("Chats").document(chatCollectionId).set(lastMessage);
+        db.collection("Chats").document(chatCollectionId).collection("Messages").document(String.valueOf(nanoTime)).set(message)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(ChatActivity.this, String.valueOf(nanoTime), Toast.LENGTH_SHORT).show();
+                        MessageEditText.setText(null);
+                        readMessages();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -169,6 +197,40 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
      * **/
 
     private void readMessages(){
+        mChat = new ArrayList<>();
 
+        //leggo tutti i messaggi che ci sono nella chat e li aggiungo man mano alla List di FriendlyMessage
+        chatCollection.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        mChat.clear();
+                        for(DocumentSnapshot msgDocument : task.getResult()){
+                            FriendlyMessage msg = new FriendlyMessage(msgDocument.getString("sender"), msgDocument.getString("receiver"), msgDocument.getString("message").trim());
+                            mChat.add(msg);
+                        }
+                        messageAdapter = new MessageAdapter(ChatActivity.this, mChat, sp.getString("mobile", ""));
+                        recyclerView.setAdapter(messageAdapter);
+                    }
+                });
+
+    }
+
+    private void getChatCollection(final String sender, final String receiver){
+        db.collection("Chats").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        Chatfound = false;
+                        for (QueryDocumentSnapshot chatDocument : task.getResult()) {
+                            if(chatDocument.getId().equals(sp.getString("mobile", "")+""+intent.getStringExtra("mobileReceiver")) ||  chatDocument.getId().equals(intent.getStringExtra("mobileReceiver")+""+sp.getString("mobile", ""))){
+                                chatCollection = db.collection("Chats").document(chatDocument.getId()).collection("Messages");
+                                Chatfound = true;
+                                chatCollectionId = chatDocument.getId();
+                            }
+                        }
+                        if(Chatfound) readMessages();
+                    }
+                });
     }
 }

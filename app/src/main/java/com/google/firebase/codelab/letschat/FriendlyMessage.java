@@ -2,59 +2,40 @@ package com.google.firebase.codelab.letschat;
 
 public class FriendlyMessage {
 
-    private String id;
-    private String text;
-    private String name;
-    private String photoUrl;
-    private String imageUrl;
+    private String msg;
+    private String sender;
+    private String receiver;
 
     public FriendlyMessage() {
     }
 
-    public FriendlyMessage(String text, String name, String photoUrl, String imageUrl) {
-        this.text = text;
-        this.name = name;
-        this.photoUrl = photoUrl;
-        this.imageUrl = imageUrl;
+    public FriendlyMessage(String sender, String receiver, String msg) {
+        this.msg = msg;
+        this.sender = sender;
+        this.receiver = receiver;
     }
 
-    public String getId() {
-        return id;
+    public String getMsg() {
+        return msg;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getSender() {
+        return sender;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public String getReceiver() {
+        return receiver;
     }
 
-    public String getName() {
-        return name;
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
     }
 }

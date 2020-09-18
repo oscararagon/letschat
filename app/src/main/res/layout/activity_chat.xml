@@ -28,8 +28,8 @@
 
         <EditText
             android:id="@+id/messageEditText"
-            android:layout_width="0dp"
             android:hint="Type a message"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"/>
@@ -38,32 +38,27 @@
             android:layout_margin="5dp"
             android:id="@+id/addImage"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             ads:srcCompat="@drawable/ic_baseline_add_a_photo_24"/>
 
         <ImageView
             android:id="@+id/addDocument"
             android:layout_margin="5dp"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             ads:srcCompat="@drawable/ic_description_24px"/>
 
         <Button
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="center_vertical"
             android:enabled="false"
             android:text="SEND"
             android:background="@color/colorPrimary"/>
 
     </LinearLayout>
 
-    <!--ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/-->
 </LinearLayout>

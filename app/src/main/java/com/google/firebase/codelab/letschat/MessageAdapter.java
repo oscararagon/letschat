@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +16,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.List;
+
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
 
@@ -24,18 +27,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private boolean isRight;
 
     private Context mContext;
-    private String sender, receiver, currentMobile;
+    private String currentMobile;
+    private List<FriendlyMessage> mChat;
 
-    public MessageAdapter(Context mContext, String sender, String receiver, String currentMobile) {
+    public MessageAdapter(Context mContext, List<FriendlyMessage> mChat, String currentMobile) {
         this.mContext = mContext;
-        this.sender = sender;
-        this.receiver = receiver;
+        this.mChat = mChat;
         this.currentMobile = currentMobile;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MessageAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if(viewType == MSG_RIGHT){
             View view = LayoutInflater.from(mContext).inflate(R.layout.item_message_sent, parent, false);
             return new MessageAdapter.ViewHolder(view);
@@ -46,42 +49,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
+    public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
+        holder.msg.setText(mChat.get(position).getMsg());
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mChat.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("Chats")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        for (QueryDocumentSnapshot chatDocument : task.getResult()) {
-                            if(chatDocument.getId().equals(sender+""+receiver) ||  chatDocument.getId().equals(receiver+""+sender)){
-                                db.collection("Chats").document(chatDocument.getId()).collection("Messages")
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                for (QueryDocumentSnapshot msgDocument : task.getResult()) {
-                                                    if(msgDocument.getString("sender").equals(currentMobile)){
-                                                        isRight = true;
-                                                    } else
-                                                        isRight = false;
-                                                }
-                                            }
-                                        });
-                            }
-                        }
-                    }
-                });
+        if(mChat.get(position).getSender().equals(currentMobile)) isRight = true;
+        else isRight = false;
         if(isRight)
             return MSG_RIGHT;
         else
@@ -90,11 +70,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        //private String
+        public TextView msg;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            msg = itemView.findViewById(R.id.show_message);
 
         }
     }
