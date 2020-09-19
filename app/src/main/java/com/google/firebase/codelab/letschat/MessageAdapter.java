@@ -51,6 +51,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
         holder.msg.setText(mChat.get(position).getMsg());
+        holder.chatTime.setText(mChat.get(position).getTimestamp());
     }
 
     @Override
@@ -70,11 +71,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         public TextView msg;
+        private TextView chatTime;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             msg = itemView.findViewById(R.id.show_message);
-
+            chatTime = (TextView) itemView.findViewById(R.id.msg_chatTime);
         }
     }
 }

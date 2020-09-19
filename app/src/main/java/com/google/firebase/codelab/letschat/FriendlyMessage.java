@@ -5,14 +5,16 @@ public class FriendlyMessage {
     private String msg;
     private String sender;
     private String receiver;
+    private String chatTime;
 
     public FriendlyMessage() {
     }
 
-    public FriendlyMessage(String sender, String receiver, String msg) {
+    public FriendlyMessage(String sender, String receiver, String msg, String chatTime) {
         this.msg = msg;
         this.sender = sender;
         this.receiver = receiver;
+        this.chatTime = chatTime;
     }
 
     public String getMsg() {
@@ -27,6 +29,8 @@ public class FriendlyMessage {
         return receiver;
     }
 
+    public String getTimestamp() { return chatTime; }
+
     public void setMsg(String msg) {
         this.msg = msg;
     }
@@ -38,4 +42,6 @@ public class FriendlyMessage {
     public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
+
+    public void setTimestamp(String timestamp) { this.chatTime = timestamp; }
 }

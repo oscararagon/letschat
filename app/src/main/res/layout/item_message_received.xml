@@ -24,9 +24,11 @@
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
+            android:id="@+id/msg_chatTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ciao"
+            android:padding="2dp"
             android:layout_gravity="bottom"
             android:textSize="12sp"/>
     </LinearLayout>

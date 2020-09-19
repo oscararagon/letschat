@@ -35,6 +35,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -45,7 +46,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 import org.w3c.dom.Text;
 
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -87,6 +91,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         username = (TextView) findViewById(R.id.contactName);
         mobileNumber = (TextView) findViewById(R.id.item_mobileNumber);
         recyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
+
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(true);
@@ -137,7 +142,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.sendButton:
                 //invia il messaggio
-                sendMessage(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"), MessageEditText.getText().toString(), System.nanoTime());
+                sendMessage(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"), MessageEditText.getText().toString(), new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime()), new Timestamp(new Date()).toDate().toString(), System.nanoTime());
                 break;
 
             case R.id.addImage:
@@ -164,13 +169,15 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
      * messaggi della chat per poi visualizzarli correttamente a video
      * */
 
-    private void sendMessage(String sender, String receiver, String msg, final long nanoTime) {
+    private void sendMessage(String sender, String receiver, String msg, String chatTime, String timestamp, final long nanoTime) {
 
         HashMap<String, Object> message = new HashMap<>();
 
         message.put("sender", sender);
         message.put("receiver", receiver);
         message.put("message", msg);
+        message.put("chatTime", chatTime);
+        message.put("timestamp", timestamp);
 
         HashMap<String, Object> lastMessage = new HashMap<>();
         lastMessage.put("lastMessage", msg);
@@ -210,7 +217,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         mChat.clear();
                         for(DocumentSnapshot msgDocument : task.getResult()){
-                            FriendlyMessage msg = new FriendlyMessage(msgDocument.getString("sender"), msgDocument.getString("receiver"), msgDocument.getString("message").trim());
+                            FriendlyMessage msg = new FriendlyMessage(msgDocument.getString("sender"), msgDocument.getString("receiver"), msgDocument.getString("message").trim(), msgDocument.getString("chatTime"));
                             mChat.add(msg);
                         }
                         messageAdapter = new MessageAdapter(ChatActivity.this, mChat, sp.getString("mobile", ""));
