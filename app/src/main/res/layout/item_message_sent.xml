@@ -9,8 +9,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:layout_marginRight="10dp"
+        android:layout_marginHorizontal="10dp"
         android:layout_marginVertical="7dp"
+        android:background="#FF9800"
         android:orientation="horizontal">
 
         <TextView
@@ -18,10 +19,15 @@
             android:text="Ciao"
             android:textSize="18sp"
             android:padding="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#FF9800"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ciao"
+            android:layout_gravity="bottom"
+            android:textSize="12sp"/>
     </LinearLayout>
 </LinearLayout>
