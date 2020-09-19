@@ -87,7 +87,7 @@ public class ContactsActivity extends AppCompatActivity {
                                     return bundle.getString("username").toUpperCase().compareTo(t1.getString("username").toUpperCase());
                                 }
                             });
-                            resultList=users;
+                            resultList = users;
                             adapter = new UserAdapter(ContactsActivity.this, contact_item_layout, users);
                             contactList.setAdapter(adapter);
                         }

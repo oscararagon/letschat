@@ -24,8 +24,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     private static int MSG_RIGHT = 0;
     private static int MSG_LEFT = 1;
 
-    private boolean isRight;
-
     private Context mContext;
     private String currentMobile;
     private List<FriendlyMessage> mChat;
@@ -51,7 +49,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
         holder.msg.setText(mChat.get(position).getMsg());
-        holder.chatTime.setText(mChat.get(position).getTimestamp());
+        holder.chatTime.setText(mChat.get(position).getchatTime());
     }
 
     @Override

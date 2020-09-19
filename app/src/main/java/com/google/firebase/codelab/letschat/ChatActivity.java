@@ -49,6 +49,8 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -142,7 +144,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.sendButton:
                 //invia il messaggio
-                sendMessage(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"), MessageEditText.getText().toString(), new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime()), new Timestamp(new Date()).toDate().toString(), System.nanoTime());
+                sendMessage(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"), MessageEditText.getText().toString(), new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime()), new Timestamp(new Date()), System.nanoTime());
                 break;
 
             case R.id.addImage:
@@ -169,7 +171,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
      * messaggi della chat per poi visualizzarli correttamente a video
      * */
 
-    private void sendMessage(String sender, String receiver, String msg, String chatTime, String timestamp, final long nanoTime) {
+    private void sendMessage(String sender, String receiver, String msg, String chatTime, Timestamp timestamp, final long nanoTime) {
 
         HashMap<String, Object> message = new HashMap<>();
 
@@ -217,9 +219,17 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         mChat.clear();
                         for(DocumentSnapshot msgDocument : task.getResult()){
-                            FriendlyMessage msg = new FriendlyMessage(msgDocument.getString("sender"), msgDocument.getString("receiver"), msgDocument.getString("message").trim(), msgDocument.getString("chatTime"));
+                            FriendlyMessage msg = new FriendlyMessage(msgDocument.getString("sender"), msgDocument.getString("receiver"), msgDocument.getString("message").trim(), msgDocument.getString("chatTime"),  msgDocument.getTimestamp("timestamp"));
                             mChat.add(msg);
                         }
+                        //ordino i messaggi della chat secondo la data
+                        Collections.sort(mChat, new Comparator<FriendlyMessage>() {
+                            @Override
+                            public int compare(FriendlyMessage msg1, FriendlyMessage msg2) {
+                                return msg1.getTimestamp().compareTo(msg2.getTimestamp());
+                            }
+                        });
+
                         messageAdapter = new MessageAdapter(ChatActivity.this, mChat, sp.getString("mobile", ""));
                         recyclerView.setAdapter(messageAdapter);
                     }

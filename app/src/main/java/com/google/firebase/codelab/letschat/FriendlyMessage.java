@@ -1,20 +1,23 @@
 package com.google.firebase.codelab.letschat;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 public class FriendlyMessage {
 
     private String msg;
     private String sender;
     private String receiver;
     private String chatTime;
+    private com.google.firebase.Timestamp timestamp;
 
-    public FriendlyMessage() {
-    }
 
-    public FriendlyMessage(String sender, String receiver, String msg, String chatTime) {
+    public FriendlyMessage(String sender, String receiver, String msg, String chatTime, com.google.firebase.Timestamp timestamp) {
         this.msg = msg;
         this.sender = sender;
         this.receiver = receiver;
         this.chatTime = chatTime;
+        this.timestamp = timestamp;
     }
 
     public String getMsg() {
@@ -25,11 +28,15 @@ public class FriendlyMessage {
         return sender;
     }
 
+    public com.google.firebase.Timestamp getTimestamp() { return timestamp; }
+
     public String getReceiver() {
         return receiver;
     }
 
-    public String getTimestamp() { return chatTime; }
+    public String getchatTime() { return chatTime; }
+
+    public void setTimestamp(com.google.firebase.Timestamp timestamp) { this.timestamp = timestamp; }
 
     public void setMsg(String msg) {
         this.msg = msg;
@@ -43,5 +50,5 @@ public class FriendlyMessage {
         this.receiver = receiver;
     }
 
-    public void setTimestamp(String timestamp) { this.chatTime = timestamp; }
+    public void setchatTime(String timestamp) { this.chatTime = chatTime; }
 }
