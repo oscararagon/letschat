@@ -158,6 +158,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Metodo per l'invio dei messaggio
+     * All'invio effettuato del messaggio si leggono poi i
+     * messaggi della chat per poi visualizzarli correttamente a video
+     * */
+
     private void sendMessage(String sender, String receiver, String msg, final long nanoTime) {
 
         HashMap<String, Object> message = new HashMap<>();
@@ -192,15 +198,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * metodo che viene chiamato all'apertura dell'activity
      * per prelevare tutti i messaggi della chat tra sender e receiver
-     *
-     * Viene chiamato all'onCreate
      * **/
 
     private void readMessages(){
         mChat = new ArrayList<>();
 
         //leggo tutti i messaggi che ci sono nella chat e li aggiungo man mano alla List di FriendlyMessage
-        chatCollection.get()
+        db.collection("Chats").document(chatCollectionId).collection("Messages").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -213,8 +217,14 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         recyclerView.setAdapter(messageAdapter);
                     }
                 });
-
     }
+
+    /**
+     * Metodo che serve per ottenere la CollectionReference della chat
+     * tra i due utenti.
+     * Viene chiamato all'onCreate e se viene trovata una chat esistente leggo i
+     * messaggi per visualizzarli correttamente a schermo
+     * */
 
     private void getChatCollection(final String sender, final String receiver){
         db.collection("Chats").get()
@@ -223,13 +233,14 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         Chatfound = false;
                         for (QueryDocumentSnapshot chatDocument : task.getResult()) {
-                            if(chatDocument.getId().equals(sp.getString("mobile", "")+""+intent.getStringExtra("mobileReceiver")) ||  chatDocument.getId().equals(intent.getStringExtra("mobileReceiver")+""+sp.getString("mobile", ""))){
+                            if(chatDocument.getId().equals(sender+""+receiver) ||  chatDocument.getId().equals(receiver+""+sender)){
                                 chatCollection = db.collection("Chats").document(chatDocument.getId()).collection("Messages");
                                 Chatfound = true;
                                 chatCollectionId = chatDocument.getId();
                             }
                         }
-                        if(Chatfound) readMessages();
+                        if(Chatfound)
+                            readMessages();
                     }
                 });
     }

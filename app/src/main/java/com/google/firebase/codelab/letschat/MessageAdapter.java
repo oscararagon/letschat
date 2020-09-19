@@ -60,12 +60,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        if(mChat.get(position).getSender().equals(currentMobile)) isRight = true;
-        else isRight = false;
-        if(isRight)
+        if(mChat.get(position).getSender().equals(currentMobile))
             return MSG_RIGHT;
         else
             return  MSG_LEFT;
+
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -74,7 +73,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
             msg = itemView.findViewById(R.id.show_message);
 
         }
