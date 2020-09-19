@@ -38,6 +38,7 @@ public class ContactsActivity extends AppCompatActivity {
     private EditText searchBar;
 
     private UserAdapter adapter;
+    private ArrayList<Bundle> resultList;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<Bundle> users;
@@ -81,14 +82,14 @@ public class ContactsActivity extends AppCompatActivity {
                         }else {
                             //ordino gli username della lista contatti in ordine alfabetico
                             Collections.sort(users, new Comparator<Bundle>() {
-                            @Override
-                            public int compare(Bundle bundle, Bundle t1) {
-                                return bundle.getString("username").toUpperCase().compareTo(t1.getString("username").toUpperCase());
-                            }
-                        });
-
-                        adapter = new UserAdapter(ContactsActivity.this, contact_item_layout, users);
-                        contactList.setAdapter(adapter);
+                                @Override
+                                public int compare(Bundle bundle, Bundle t1) {
+                                    return bundle.getString("username").toUpperCase().compareTo(t1.getString("username").toUpperCase());
+                                }
+                            });
+                            resultList=users;
+                            adapter = new UserAdapter(ContactsActivity.this, contact_item_layout, users);
+                            contactList.setAdapter(adapter);
                         }
                     }
                 });
@@ -103,7 +104,7 @@ public class ContactsActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                ArrayList<Bundle> resultList = filter(charSequence);
+                resultList = filter(charSequence);
                 adapter = new UserAdapter(ContactsActivity.this, contact_item_layout, resultList);
                 contactList.setAdapter(adapter);
             }
@@ -118,9 +119,9 @@ public class ContactsActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
-                intent.putExtra("profilePicReceiver", users.get(position).getString("profilePic"));
-                intent.putExtra("usernameReceiver", users.get(position).getString("username"));
-                intent.putExtra("mobileReceiver", users.get(position).getString("mobile"));
+                intent.putExtra("profilePicReceiver", resultList.get(position).getString("profilePic"));
+                intent.putExtra("usernameReceiver", resultList.get(position).getString("username"));
+                intent.putExtra("mobileReceiver", resultList.get(position).getString("mobile"));
                 startActivity(intent);
             }
         });
