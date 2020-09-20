@@ -66,6 +66,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private CircleImageView ImgContact;
     private TextView username, mobileNumber;
     private RecyclerView recyclerView;
+    private ImageView imgFullScreen;
 
     private MessageAdapter messageAdapter;
 
@@ -93,6 +94,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         username = (TextView) findViewById(R.id.contactName);
         mobileNumber = (TextView) findViewById(R.id.item_mobileNumber);
         recyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
+        imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
 
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -160,7 +162,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.imgContact:
-
+                if(!intent.getStringExtra("profilePicReceiver").equals("")) {
+                    imgFullScreen.setVisibility(View.VISIBLE);
+                    Glide.with(ChatActivity.this).load(intent.getStringExtra("profilePicReceiver")).into(imgFullScreen);
+                } else{
+                    ImgContact.setImageResource(R.drawable.ic_baseline_account_circle_24);
+                }
                 break;
         }
     }
@@ -260,5 +267,15 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                             readMessages();
                     }
                 });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(imgFullScreen.getVisibility() == View.VISIBLE){
+            imgFullScreen.setImageDrawable(null);
+            imgFullScreen.setVisibility(View.GONE);
+        }else{
+            super.onBackPressed();
+        }
     }
 }

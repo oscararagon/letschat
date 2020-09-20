@@ -9,6 +9,13 @@
     android:layout_height="match_parent"
     tools:context="com.google.firebase.codelab.letschat.ChatActivity">
 
+    <ImageView
+        android:id="@+id/imgFullScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
     <include
         layout="@layout/toolbar_chat"/>
 

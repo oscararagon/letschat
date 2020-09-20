@@ -268,6 +268,8 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }else if(!saved){
+            super.onBackPressed();
+            Toast.makeText(SettingsActivity.this, "You have not modified your data", Toast.LENGTH_SHORT).show();
             //se l'utente preme il tasto indietro senza salvare, devo sostituire l'immagine profilo con quella vecchia
             localImgPath = sp.getString("lastProfilePic", "");
             //upload sullo storage dell'immagine profilo vecchia
@@ -282,7 +284,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Toast.makeText(SettingsActivity.this, "Sei uscito senza salvare\nReimpostata la vecchia immagine profilo", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(SettingsActivity.this, "Sei uscito senza salvare\nReimpostata la vecchia immagine profilo", Toast.LENGTH_SHORT).show();
                 }
             });
         }else

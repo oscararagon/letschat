@@ -11,7 +11,6 @@ public class FriendlyMessage {
     private String chatTime;
     private com.google.firebase.Timestamp timestamp;
 
-
     public FriendlyMessage(String sender, String receiver, String msg, String chatTime, com.google.firebase.Timestamp timestamp) {
         this.msg = msg;
         this.sender = sender;
