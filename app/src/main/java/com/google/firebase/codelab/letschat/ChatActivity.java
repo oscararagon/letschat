@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,6 +68,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private TextView username, mobileNumber;
     private RecyclerView recyclerView;
     private ImageView imgFullScreen;
+    //private ImageView copyMsg, forwardMsg;
 
     private MessageAdapter messageAdapter;
 
@@ -95,6 +97,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         mobileNumber = (TextView) findViewById(R.id.item_mobileNumber);
         recyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
         imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
+        //copyMsg = (ImageView) findViewById(R.id.imgCopyMsg);
+        //forwardMsg = (ImageView) findViewById(R.id.imgForwardTo);
 
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -111,7 +115,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             username.setText(intent.getStringExtra("usernameReceiver"));
             mobileNumber.setText(intent.getStringExtra("mobileReceiver"));
             if(intent.getStringExtra("profilePicReceiver").equals("")){
-                ImgContact.setImageResource(R.drawable.ic_account_circle_black_36dp);
+                ImgContact.setImageResource(R.drawable.ic_baseline_account_circle_24);
             }else
                 Glide.with(this).load(intent.getStringExtra("profilePicReceiver")).into(ImgContact);
         }

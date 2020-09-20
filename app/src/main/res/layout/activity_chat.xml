@@ -42,7 +42,7 @@
             android:layout_weight="1"/>
 
         <ImageView
-            android:layout_margin="5dp"
+            android:layout_marginLeft="12dp"
             android:id="@+id/addImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
 
         <ImageView
             android:id="@+id/addDocument"
-            android:layout_margin="5dp"
+            android:layout_marginHorizontal="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -59,7 +59,7 @@
 
         <Button
             android:id="@+id/sendButton"
-            android:layout_width="wrap_content"
+            android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:enabled="false"
