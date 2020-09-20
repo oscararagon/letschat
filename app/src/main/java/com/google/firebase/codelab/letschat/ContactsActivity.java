@@ -57,7 +57,7 @@ public class ContactsActivity extends AppCompatActivity {
         sp = this.getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
         contactList = (ListView) findViewById(R.id.contactList);
-        txtEmptyList = (TextView) findViewById(R.id.listEmpty);
+        txtEmptyList = (TextView) findViewById(R.id.contactEmpty);
         searchBar = (EditText) findViewById(R.id.searchBar);
 
         db.collection("Users").get()
@@ -77,8 +77,9 @@ public class ContactsActivity extends AppCompatActivity {
                             }
                         }
                         if(totalUsers < 1){
+                            searchBar.setVisibility(View.GONE);
+                            contactList.setVisibility(View.GONE);
                             txtEmptyList.setVisibility(View.VISIBLE);
-                            //contactList.setEmptyView(txtEmptyList);
                         }else {
                             //ordino gli username della lista contatti in ordine alfabetico
                             Collections.sort(users, new Comparator<Bundle>() {
