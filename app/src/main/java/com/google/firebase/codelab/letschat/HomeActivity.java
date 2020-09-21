@@ -17,10 +17,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -28,6 +37,9 @@ public class HomeActivity extends AppCompatActivity {
     private TextView txtEmptyList;
     private ImageView btnAddChat, btnOpenSettings, btnRemoveChat;
     private SharedPreferences sp;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ArrayList<Chat> chats;
+    private ChatAdapter adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,8 +63,36 @@ public class HomeActivity extends AppCompatActivity {
         btnOpenSettings = (ImageView) findViewById(R.id.btnMenu);
         btnRemoveChat = (ImageView) findViewById(R.id.btnDeleteChat);
 
-        chatList.setEmptyView(txtEmptyList);
 
+        //ottengo le chat aperte dell'utente
+        CollectionReference chatRef = db.collection("Chats");
+        chats = new ArrayList<>();
+        chatRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                int totalChat = 0;
+                chats.clear();
+                for(QueryDocumentSnapshot chatDoc : value){
+                    if(chatDoc.getId().contains(sp.getString("mobile", ""))){
+                        //quetsa è una chat aperta
+                        Chat chat;
+                        if(chatDoc.getString("profilePic1").equals(sp.getString("remoteProfilePic", ""))){
+                            chat = new Chat(chatDoc.getString("username2"), chatDoc.getString("lastMessage"), chatDoc.getString("chatTime"), chatDoc.getString("profilePic2"), chatDoc.getString("sender"));
+                        }else{
+                            chat = new Chat(chatDoc.getString("username1"), chatDoc.getString("lastMessage"), chatDoc.getString("chatTime"), chatDoc.getString("profilePic1"), chatDoc.getString("sender"));
+                        }
+                        chats.add(chat);
+                        totalChat++;
+                    }
+                }
+                if(totalChat < 1) chatList.setEmptyView(txtEmptyList);
+                else{
+                    adapter = new ChatAdapter(HomeActivity.this, R.layout.chat_item_layout, chats);
+                    chatList.setAdapter(adapter);
+
+                }
+            }
+        });
         btnAddChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,10 +100,6 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-
-        //se c'è almeno una chat bisogna far scomparire la scritta Let's add a new chat
-
 
         btnOpenSettings.setOnClickListener(new View.OnClickListener() {
             @Override

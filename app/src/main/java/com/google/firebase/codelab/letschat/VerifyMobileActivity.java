@@ -135,6 +135,9 @@ public class VerifyMobileActivity extends AppCompatActivity {
                     //salvo sullo SharedPreferences il path locale dell'immagine profilo
                     sp.edit().putString("lastProfilePic", intent.getStringExtra("localImgPath")).apply();
 
+                    //mi salvo in locale anche l'immagine profilo remota di firebase
+                    sp.edit().putString("remoteProfilePic", remoteImgUri).apply();
+
                     //salvataggio utente su db
                     db.collection("Users").document(intent.getStringExtra("mobileNumber")).set(user)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {

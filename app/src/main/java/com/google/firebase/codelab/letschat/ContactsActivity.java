@@ -37,7 +37,7 @@ public class ContactsActivity extends AppCompatActivity {
     private TextView txtEmptyList;
     private EditText searchBar;
 
-    private UserAdapter adapter;
+    private UserAdapter  adapter;
     private ArrayList<Bundle> resultList;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();

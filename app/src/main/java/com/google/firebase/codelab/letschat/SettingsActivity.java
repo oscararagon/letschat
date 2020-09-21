@@ -156,6 +156,9 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                                 public void onSuccess(Void aVoid) {
                                     Toast.makeText(SettingsActivity.this, "Your data have been saved correctly!", Toast.LENGTH_SHORT).show();
                                     saved = true;
+
+                                    //mi salvo in locale anche l'immagine profilo remota di firebase
+                                    sp.edit().putString("remoteProfilePic", imgPath).apply();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {

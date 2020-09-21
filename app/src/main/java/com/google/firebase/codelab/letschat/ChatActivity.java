@@ -1,52 +1,41 @@
 
 package com.google.firebase.codelab.letschat;
 
-import android.Manifest;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.util.ApiUtil;
+import com.google.gson.internal.$Gson$Preconditions;
 
-import org.w3c.dom.Text;
-
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -111,6 +100,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
         getChatCollection(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"));
 
+        readMessages();
+
         if(intent != null){
             username.setText(intent.getStringExtra("usernameReceiver"));
             mobileNumber.setText(intent.getStringExtra("mobileReceiver"));
@@ -150,7 +141,14 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.sendButton:
                 //invia il messaggio
-                sendMessage(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"), MessageEditText.getText().toString(), new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime()), new Timestamp(new Date()), System.nanoTime());
+                sendMessage(sp.getString("mobile", ""), intent.getStringExtra("mobileReceiver"),
+                        sp.getString("remoteProfilePic", ""),
+                        intent.getStringExtra("profilePicReceiver"),
+                        sp.getString("username", ""),
+                        intent.getStringExtra("usernameReceiver"),
+                        MessageEditText.getText().toString(),
+                        new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime()),
+                        new Timestamp(new Date()), System.nanoTime());
                 break;
 
             case R.id.addImage:
@@ -182,7 +180,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
      * messaggi della chat per poi visualizzarli correttamente a video
      * */
 
-    private void sendMessage(String sender, String receiver, String msg, String chatTime, Timestamp timestamp, final long nanoTime) {
+    private void sendMessage(String sender, String receiver, String profilePic1, String profilePic2, String user1, String user2, String msg, String chatTime, Timestamp timestamp, final long nanoTime) {
 
         HashMap<String, Object> message = new HashMap<>();
 
@@ -194,11 +192,26 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
         HashMap<String, Object> lastMessage = new HashMap<>();
         lastMessage.put("lastMessage", msg);
+        lastMessage.put("chatTime", chatTime);
+        lastMessage.put("sender", sender);
 
-        if(!Chatfound)
+        if(!Chatfound) {
+            HashMap<String, Object> dataChat = new HashMap<>();
+            dataChat.put("profilePic1", profilePic1);
+            dataChat.put("profilePic2", profilePic2);
+            dataChat.put("username1", user1);
+            dataChat.put("username2", user2);
+            dataChat.put("lastMessage", msg);
+            dataChat.put("chatTime", chatTime);
+            dataChat.put("sender", sender);
+
             chatCollectionId = sender + "" + receiver;
-
-        db.collection("Chats").document(chatCollectionId).set(lastMessage);
+            db.collection("Chats").document(chatCollectionId).set(dataChat);
+            Chatfound = true;
+        }
+        db.collection("Chats").document(chatCollectionId).update("lastMessage", msg);
+        db.collection("Chats").document(chatCollectionId).update("chatTime", chatTime);
+        db.collection("Chats").document(chatCollectionId).update("sender", sender);
         db.collection("Chats").document(chatCollectionId).collection("Messages").document(String.valueOf(nanoTime)).set(message)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -221,10 +234,32 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
      * **/
 
     private void readMessages(){
-        mChat = new ArrayList<>();
+        if(Chatfound) {
+            mChat = new ArrayList<>();
+            //leggo tutti i messaggi che ci sono nella chat e li aggiungo man mano alla List di FriendlyMessage
+            db.collection("Chats").document(chatCollectionId).collection("Messages")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                            mChat.clear();
+                            for (DocumentSnapshot msgDocument : value) {
+                                FriendlyMessage msg = new FriendlyMessage(msgDocument.getString("sender"), msgDocument.getString("receiver"), msgDocument.getString("message").trim(), msgDocument.getString("chatTime"), msgDocument.getTimestamp("timestamp"));
+                                mChat.add(msg);
+                            }
+                            //ordino i messaggi della chat secondo la data
+                            Collections.sort(mChat, new Comparator<FriendlyMessage>() {
+                                @Override
+                                public int compare(FriendlyMessage msg1, FriendlyMessage msg2) {
+                                    return msg1.getTimestamp().compareTo(msg2.getTimestamp());
+                                }
+                            });
 
-        //leggo tutti i messaggi che ci sono nella chat e li aggiungo man mano alla List di FriendlyMessage
-        db.collection("Chats").document(chatCollectionId).collection("Messages").get()
+                            messageAdapter = new MessageAdapter(ChatActivity.this, mChat, sp.getString("mobile", ""));
+                            recyclerView.setAdapter(messageAdapter);
+                        }
+                    });
+        }
+               /* .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -244,7 +279,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         messageAdapter = new MessageAdapter(ChatActivity.this, mChat, sp.getString("mobile", ""));
                         recyclerView.setAdapter(messageAdapter);
                     }
-                });
+                });*/
     }
 
     /**
@@ -267,8 +302,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                                 chatCollectionId = chatDocument.getId();
                             }
                         }
-                        if(Chatfound)
-                            readMessages();
+                        readMessages();
                     }
                 });
     }
@@ -280,6 +314,8 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             imgFullScreen.setVisibility(View.GONE);
         }else{
             super.onBackPressed();
+            Intent intent = new Intent(ChatActivity.this, HomeActivity.class);
+            startActivity(intent);
         }
     }
 }
