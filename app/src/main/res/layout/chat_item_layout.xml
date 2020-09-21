@@ -48,11 +48,20 @@
                     android:layout_height="12dp"
                     android:src="@drawable/ic_check_24"/>
 
+                <ImageView
+                    android:id="@+id/received_message"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    app:tint="@color/cardview_dark_background"
+                    android:src="@drawable/ic_baseline_textsms_24"/>
+
                 <TextView
                     android:layout_marginLeft="5dp"
                     android:id="@+id/last_message"
+                    android:ellipsize="end"
+                    android:singleLine="true"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="22dp"
                     android:textSize="15sp"
                     android:text="last message"/>
 

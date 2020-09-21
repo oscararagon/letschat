@@ -2,6 +2,7 @@ package com.google.firebase.codelab.letschat;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,12 +38,14 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
         TextView txtUsername, txtLastMessage, txtChatTime, txtNrMessages;
         CircleImageView profilePic;
         ImageView tick;
+        ImageView msgReceived;
 
         txtUsername = (TextView) convertView.findViewById(R.id.item_username);
         txtLastMessage = (TextView) convertView.findViewById(R.id.last_message);
         txtChatTime = (TextView) convertView.findViewById(R.id.time_last_message);
         profilePic = (CircleImageView) convertView.findViewById(R.id.item_profile_photo);
         tick = (ImageView) convertView.findViewById(R.id.tick_message);
+        msgReceived = (ImageView) convertView.findViewById(R.id.received_message);
 
         final Chat chat = getItem(position);
 
@@ -59,8 +62,10 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
 
         if(!chat.getSenderMessage().equals(sp.getString("mobile", ""))){
             tick.setVisibility(View.GONE);
+            msgReceived.setVisibility(View.VISIBLE);
         }else {
             tick.setVisibility(View.VISIBLE);
+            msgReceived.setVisibility(View.GONE);
         }
         txtUsername.setText(chat.getUser());
         txtLastMessage.setText(chat.getLastMessage());

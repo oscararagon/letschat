@@ -2,14 +2,20 @@
 package com.google.firebase.codelab.letschat;
 
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
@@ -51,13 +57,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button SendButton;
     private EditText MessageEditText;
-    private ImageView AddImage;
-    private ImageView AddDocument;
     private CircleImageView ImgContact;
     private TextView username, mobileNumber;
     private RecyclerView recyclerView;
     private ImageView imgFullScreen;
-    //private ImageView copyMsg, forwardMsg;
 
     private MessageAdapter messageAdapter;
 
@@ -70,24 +73,24 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference chatCollection;
 
+    private NotificationManagerCompat notificationManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        notificationManager = NotificationManagerCompat.from(this);
+
         getSupportActionBar().hide();
 
         SendButton = (Button) findViewById(R.id.sendButton);
         MessageEditText = (EditText) findViewById(R.id.messageEditText);
-        AddDocument = (ImageView) findViewById(R.id.addDocument);
-        AddImage = (ImageView) findViewById(R.id.addImage);
         ImgContact = (CircleImageView) findViewById(R.id.imgContact);
         username = (TextView) findViewById(R.id.contactName);
         mobileNumber = (TextView) findViewById(R.id.item_mobileNumber);
         recyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
         imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
-        //copyMsg = (ImageView) findViewById(R.id.imgCopyMsg);
-        //forwardMsg = (ImageView) findViewById(R.id.imgForwardTo);
 
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -131,8 +134,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         SendButton.setOnClickListener(this);
-        AddImage.setOnClickListener(this);
-        AddDocument.setOnClickListener(this);
         ImgContact.setOnClickListener(this);
     }
 
@@ -149,17 +150,23 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         MessageEditText.getText().toString(),
                         new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime()),
                         new Timestamp(new Date()), System.nanoTime());
-                break;
 
-            case R.id.addImage:
-                //Nuovo intent per scegliere immagine dalla galleria
-                /*Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), RESULT_LOAD_IMAGE);*/
-                break;
+                // Creo l'intent per quando si clicca su una notifica
+                Intent i = new Intent(this, ChatActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
 
-            case R.id.addDocument:
+                //creazione notifica nel dispositivo del destinatario
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Notification.CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_baseline_textsms_24)
+                        .setContentTitle(sp.getString("username", ""))
+                        .setContentText(MessageEditText.getText().toString())
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setContentIntent(pendingIntent)
+                        .setAutoCancel(true);
+
+                // faccio apparire la notifica
+                notificationManager.notify(1, builder.build()); // notificationId is a unique int for each notification that you must define
 
                 break;
 
@@ -259,27 +266,6 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
         }
-               /* .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        mChat.clear();
-                        for(DocumentSnapshot msgDocument : task.getResult()){
-                            FriendlyMessage msg = new FriendlyMessage(msgDocument.getString("sender"), msgDocument.getString("receiver"), msgDocument.getString("message").trim(), msgDocument.getString("chatTime"),  msgDocument.getTimestamp("timestamp"));
-                            mChat.add(msg);
-                        }
-                        //ordino i messaggi della chat secondo la data
-                        Collections.sort(mChat, new Comparator<FriendlyMessage>() {
-                            @Override
-                            public int compare(FriendlyMessage msg1, FriendlyMessage msg2) {
-                                return msg1.getTimestamp().compareTo(msg2.getTimestamp());
-                            }
-                        });
-
-                        messageAdapter = new MessageAdapter(ChatActivity.this, mChat, sp.getString("mobile", ""));
-                        recyclerView.setAdapter(messageAdapter);
-                    }
-                });*/
     }
 
     /**

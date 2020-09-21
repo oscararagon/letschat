@@ -30,6 +30,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -74,7 +76,7 @@ public class HomeActivity extends AppCompatActivity {
                 chats.clear();
                 for(QueryDocumentSnapshot chatDoc : value){
                     if(chatDoc.getId().contains(sp.getString("mobile", ""))){
-                        //quetsa è una chat aperta
+                        //questa è una chat aperta
                         Chat chat;
                         if(chatDoc.getString("profilePic1").equals(sp.getString("remoteProfilePic", ""))){
                             chat = new Chat(chatDoc.getString("username2"), chatDoc.getString("lastMessage"), chatDoc.getString("chatTime"), chatDoc.getString("profilePic2"), chatDoc.getString("sender"));
@@ -87,9 +89,15 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 if(totalChat < 1) chatList.setEmptyView(txtEmptyList);
                 else{
+                    //ordino gli item della lista in base all'orario del lastMessage
+                    Collections.sort(chats, new Comparator<Chat>() {
+                        @Override
+                        public int compare(Chat chat, Chat t1) {
+                            return t1.getChatTime().compareTo(chat.getChatTime());
+                        }
+                    });
                     adapter = new ChatAdapter(HomeActivity.this, R.layout.chat_item_layout, chats);
                     chatList.setAdapter(adapter);
-
                 }
             }
         });
@@ -109,6 +117,17 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                intent.putExtra("profilePicReceiver", chats.get(position).getProfilePic());
+                intent.putExtra("usernameReceiver", chats.get(position).getUser());
+                //intent.putExtra("mobileReceiver", chats.get(position).;
+                startActivity(intent);
+            }
+        });
+
         /*chatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -118,5 +137,11 @@ public class HomeActivity extends AppCompatActivity {
                 return false;
             }
         });*/
+    }
+
+    //quando premo indietro libero lo stack delle attività ed esco dall'app
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
     }
 }
