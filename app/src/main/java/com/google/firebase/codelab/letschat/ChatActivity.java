@@ -61,6 +61,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private TextView username, mobileNumber;
     private RecyclerView recyclerView;
     private ImageView imgFullScreen;
+    private TextView msgBadge;
 
     private MessageAdapter messageAdapter;
 
@@ -91,6 +92,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         mobileNumber = (TextView) findViewById(R.id.item_mobileNumber);
         recyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
         imgFullScreen = (ImageView) findViewById(R.id.imgFullScreen);
+        msgBadge = (TextView) findViewById(R.id.msg_badge);
 
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());

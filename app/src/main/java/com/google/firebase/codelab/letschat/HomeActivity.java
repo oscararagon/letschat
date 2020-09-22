@@ -142,6 +142,7 @@ public class HomeActivity extends AppCompatActivity {
     //quando premo indietro libero lo stack delle attività ed esco dall'app
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         finishAffinity();
     }
 }
