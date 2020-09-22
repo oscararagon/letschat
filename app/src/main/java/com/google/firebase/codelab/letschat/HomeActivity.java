@@ -1,12 +1,16 @@
 package com.google.firebase.codelab.letschat;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,11 +41,16 @@ public class HomeActivity extends AppCompatActivity {
 
     private ListView chatList;
     private TextView txtEmptyList;
-    private ImageView btnAddChat, btnOpenSettings, btnRemoveChat;
+    private ImageView btnAddChat, btnOpenSettings;
+
     private SharedPreferences sp;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<Chat> chats;
     private ChatAdapter adapter;
+
+    private int totalChat = 0;
+
+    private CollectionReference chatRef = db.collection("Chats");
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,25 +72,25 @@ public class HomeActivity extends AppCompatActivity {
         txtEmptyList = (TextView) findViewById(R.id.listEmpty);
         btnAddChat = (ImageView) findViewById(R.id.btnAddChat);
         btnOpenSettings = (ImageView) findViewById(R.id.btnMenu);
-        btnRemoveChat = (ImageView) findViewById(R.id.btnDeleteChat);
-
 
         //ottengo le chat aperte dell'utente
-        CollectionReference chatRef = db.collection("Chats");
         chats = new ArrayList<>();
         chatRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                int totalChat = 0;
                 chats.clear();
                 for(QueryDocumentSnapshot chatDoc : value){
                     if(chatDoc.getId().contains(sp.getString("mobile", ""))){
                         //questa è una chat aperta
                         Chat chat;
-                        if(chatDoc.getString("profilePic1").equals(sp.getString("remoteProfilePic", ""))){
-                            chat = new Chat(chatDoc.getString("username2"), chatDoc.getString("lastMessage"), chatDoc.getString("chatTime"), chatDoc.getString("profilePic2"), chatDoc.getString("sender"));
+                        if(sp.getString("remoteProfilePic", "").equals(chatDoc.getString("profilePic1"))){
+                            chat = new Chat(chatDoc.getString("username2"), chatDoc.getString("mobile2"), chatDoc.getString("lastMessage"),
+                                    chatDoc.getString("chatTime"), chatDoc.getString("profilePic2"),
+                                    chatDoc.getString("sender"), chatDoc.getTimestamp("timestamp"));
                         }else{
-                            chat = new Chat(chatDoc.getString("username1"), chatDoc.getString("lastMessage"), chatDoc.getString("chatTime"), chatDoc.getString("profilePic1"), chatDoc.getString("sender"));
+                            chat = new Chat(chatDoc.getString("username1"), chatDoc.getString("mobile1"), chatDoc.getString("lastMessage"),
+                                    chatDoc.getString("chatTime"), chatDoc.getString("profilePic1"),
+                                    chatDoc.getString("sender"), chatDoc.getTimestamp("timestamp"));
                         }
                         chats.add(chat);
                         totalChat++;
@@ -89,11 +98,11 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 if(totalChat < 1) chatList.setEmptyView(txtEmptyList);
                 else{
-                    //ordino gli item della lista in base all'orario del lastMessage
+                    //ordino gli item della lista in base al timestamp del lastMessage
                     Collections.sort(chats, new Comparator<Chat>() {
                         @Override
                         public int compare(Chat chat, Chat t1) {
-                            return t1.getChatTime().compareTo(chat.getChatTime());
+                            return t1.getTimestamp().compareTo(chat.getTimestamp());
                         }
                     });
                     adapter = new ChatAdapter(HomeActivity.this, R.layout.chat_item_layout, chats);
@@ -117,26 +126,63 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        //da sistemare
         chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent intent = new Intent(HomeActivity.this, ChatActivity.class);
                 intent.putExtra("profilePicReceiver", chats.get(position).getProfilePic());
                 intent.putExtra("usernameReceiver", chats.get(position).getUser());
-                //intent.putExtra("mobileReceiver", chats.get(position).;
+                intent.putExtra("mobileReceiver", chats.get(position).getMobile());
                 startActivity(intent);
             }
         });
 
-        /*chatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        chatList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                btnAddChat.setVisibility(view.GONE);
-                btnOpenSettings.setVisibility(view.GONE);
-                btnRemoveChat.setVisibility(view.VISIBLE);
-                return false;
+                final int position = i;
+                new AlertDialog.Builder(HomeActivity.this)
+                        .setIcon(R.drawable.ic_baseline_delete_24)
+                        .setTitle("Delete chat")
+                        .setMessage("Do you want to delete this chat?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                                final String sender = sp.getString("mobile", "");
+                                final String receiver = chats.get(position).getMobile();
+
+                                //rimuovo chat dalla lista
+                                chats.remove(position);
+                                adapter = new ChatAdapter(HomeActivity.this, R.layout.chat_item_layout, chats);
+                                chatList.setAdapter(adapter);
+                                totalChat--;
+
+                                if(totalChat < 1) chatList.setEmptyView(txtEmptyList);
+
+                                //rimuovo chat dal db. La chat non viene completamente rimossa dal db ma solo disabilitata. Quando
+                                //si manda un nuovo messaggio i vecchi messaggi vengono ripristinati
+                                chatRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        for(QueryDocumentSnapshot chatDoc : task.getResult()){
+                                            if(chatDoc.getId().equals(sender+""+receiver)) {
+                                                chatRef.document(sender+""+receiver).delete();
+                                            }
+                                            if (chatDoc.getId().equals(receiver+""+sender)) {
+                                                chatRef.document(receiver+""+sender).delete();
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+                return true;
             }
-        });*/
+        });
     }
 
     //quando premo indietro libero lo stack delle attività ed esco dall'app

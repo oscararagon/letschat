@@ -35,7 +35,7 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
             convertView = inflater.inflate(R.layout.chat_item_layout, parent, false);
         }
 
-        TextView txtUsername, txtLastMessage, txtChatTime, txtNrMessages;
+        TextView txtUsername, txtLastMessage, txtChatTime;
         CircleImageView profilePic;
         ImageView tick;
         ImageView msgReceived;

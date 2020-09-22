@@ -203,6 +203,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         lastMessage.put("lastMessage", msg);
         lastMessage.put("chatTime", chatTime);
         lastMessage.put("sender", sender);
+        lastMessage.put("timestamp", timestamp);
 
         if(!Chatfound) {
             HashMap<String, Object> dataChat = new HashMap<>();
@@ -210,8 +211,11 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             dataChat.put("profilePic2", profilePic2);
             dataChat.put("username1", user1);
             dataChat.put("username2", user2);
+            dataChat.put("mobile1", sp.getString("mobile", ""));
+            dataChat.put("mobile2", intent.getStringExtra("mobileReceiver"));
             dataChat.put("lastMessage", msg);
             dataChat.put("chatTime", chatTime);
+            dataChat.put("timestamp", timestamp);
             dataChat.put("sender", sender);
 
             chatCollectionId = sender + "" + receiver;
@@ -221,6 +225,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         db.collection("Chats").document(chatCollectionId).update("lastMessage", msg);
         db.collection("Chats").document(chatCollectionId).update("chatTime", chatTime);
         db.collection("Chats").document(chatCollectionId).update("sender", sender);
+        db.collection("Chats").document(chatCollectionId).update("timestamp", timestamp);
         db.collection("Chats").document(chatCollectionId).collection("Messages").document(String.valueOf(nanoTime)).set(message)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
