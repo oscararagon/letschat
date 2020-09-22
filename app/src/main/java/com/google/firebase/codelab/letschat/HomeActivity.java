@@ -78,26 +78,32 @@ public class HomeActivity extends AppCompatActivity {
                     if(chatDoc.getId().contains(sp.getString("mobile", ""))){
                         //questa è una chat aperta
                         Chat chat;
-                        if(chatDoc.getString("profilePic1").equals(sp.getString("remoteProfilePic", ""))){
-                            chat = new Chat(chatDoc.getString("username2"), chatDoc.getString("lastMessage"), chatDoc.getString("chatTime"), chatDoc.getString("profilePic2"), chatDoc.getString("sender"));
+                        if(sp.getString("remoteProfilePic", "").equals(chatDoc.getString("profilePic1"))){
+                            chat = new Chat(chatDoc.getString("username2"), chatDoc.getString("mobile2"), chatDoc.getString("lastMessage"),
+                                    chatDoc.getString("chatTime"), chatDoc.getString("profilePic2"),
+                                    chatDoc.getString("sender"), chatDoc.getTimestamp("timestamp"));
                         }else{
-                            chat = new Chat(chatDoc.getString("username1"), chatDoc.getString("lastMessage"), chatDoc.getString("chatTime"), chatDoc.getString("profilePic1"), chatDoc.getString("sender"));
+                            chat = new Chat(chatDoc.getString("username1"), chatDoc.getString("mobile1"), chatDoc.getString("lastMessage"),
+                                    chatDoc.getString("chatTime"), chatDoc.getString("profilePic1"),
+                                    chatDoc.getString("sender"), chatDoc.getTimestamp("timestamp"));
                         }
                         chats.add(chat);
                         totalChat++;
                     }
                 }
-                if(totalChat < 1) chatList.setEmptyView(txtEmptyList);
+                if(totalChat < 1)
+                    chatList.setEmptyView(txtEmptyList);
                 else{
-                    //ordino gli item della lista in base all'orario del lastMessage
+                    //ordino gli item della lista in base al timestamp del lastMessage
                     Collections.sort(chats, new Comparator<Chat>() {
                         @Override
                         public int compare(Chat chat, Chat t1) {
-                            return t1.getChatTime().compareTo(chat.getChatTime());
+                            return t1.getTimestamp().compareTo(chat.getTimestamp());
                         }
                     });
                     adapter = new ChatAdapter(HomeActivity.this, R.layout.chat_item_layout, chats);
                     chatList.setAdapter(adapter);
+
                 }
             }
         });
@@ -117,13 +123,15 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+
+        //da sistemare
         chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent intent = new Intent(HomeActivity.this, ChatActivity.class);
                 intent.putExtra("profilePicReceiver", chats.get(position).getProfilePic());
                 intent.putExtra("usernameReceiver", chats.get(position).getUser());
-                //intent.putExtra("mobileReceiver", chats.get(position).;
+                intent.putExtra("mobileReceiver", chats.get(position).getMobile());
                 startActivity(intent);
             }
         });
