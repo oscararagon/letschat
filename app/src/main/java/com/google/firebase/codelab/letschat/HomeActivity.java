@@ -48,7 +48,7 @@ public class HomeActivity extends AppCompatActivity {
     private ArrayList<Chat> chats;
     private ChatAdapter adapter;
 
-    private int totalChat = 0;
+    private int totalChat;
 
     private CollectionReference chatRef = db.collection("Chats");
 
@@ -73,11 +73,12 @@ public class HomeActivity extends AppCompatActivity {
         btnAddChat = (ImageView) findViewById(R.id.btnAddChat);
         btnOpenSettings = (ImageView) findViewById(R.id.btnMenu);
 
+
         //ottengo le chat aperte dell'utente
-        chats = new ArrayList<>();
         chatRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                chats = new ArrayList<>();
                 chats.clear();
                 for(QueryDocumentSnapshot chatDoc : value){
                     if(chatDoc.getId().contains(sp.getString("mobile", ""))){
@@ -107,26 +108,11 @@ public class HomeActivity extends AppCompatActivity {
                     });
                     adapter = new ChatAdapter(HomeActivity.this, R.layout.chat_item_layout, chats);
                     chatList.setAdapter(adapter);
+
                 }
             }
         });
-        btnAddChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent =  new Intent(HomeActivity.this, ContactsActivity.class);
-                startActivity(intent);
-            }
-        });
 
-        btnOpenSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent =  new Intent(HomeActivity.this, SettingsActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        //da sistemare
         chatList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -181,6 +167,22 @@ public class HomeActivity extends AppCompatActivity {
                         .setNegativeButton("No", null)
                         .show();
                 return true;
+            }
+        });
+
+        btnAddChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent =  new Intent(HomeActivity.this, ContactsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnOpenSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent =  new Intent(HomeActivity.this, SettingsActivity.class);
+                startActivity(intent);
             }
         });
     }

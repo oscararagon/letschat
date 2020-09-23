@@ -1,94 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+
+    android:layout_margin="5dp"
+    android:orientation="horizontal"
+    android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:layout_gravity="center"
+        android:id="@+id/item_profile_photo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:civ_border_width="1dp"
+        android:src="@drawable/ic_baseline_account_circle_24"/>
 
     <LinearLayout
-        android:layout_margin="5dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:descendantFocusability="blocksDescendants"
+        android:layout_marginLeft="10dp"
+        android:orientation="vertical"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:longClickable="true">
+        android:layout_height="wrap_content">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:layout_gravity="center"
-            android:id="@+id/item_profile_photo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:civ_border_width="1dp"
-            android:src="@drawable/ic_baseline_account_circle_24"/>
+        <TextView
+            android:id="@+id/item_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textColor="@color/cardview_dark_background"
+            android:text="USERNAME PERSONA"/>
 
         <LinearLayout
-            android:layout_marginLeft="10dp"
-            android:orientation="vertical"
-            android:layout_weight="1"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/tick_message"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@drawable/ic_check_24"/>
+
+            <ImageView
+                android:id="@+id/received_message"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                app:tint="@color/cardview_dark_background"
+                android:src="@drawable/ic_baseline_textsms_24"/>
 
             <TextView
-                android:id="@+id/item_username"
+                android:layout_marginLeft="5dp"
+                android:id="@+id/last_message"
+                android:ellipsize="end"
+                android:singleLine="true"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="@color/cardview_dark_background"
-                android:text="USERNAME PERSONA"/>
+                android:layout_height="22dp"
+                android:textSize="15sp"
+                android:text="last message"/>
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
-
-                <ImageView
-                    android:id="@+id/tick_message"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:src="@drawable/ic_check_24"/>
-
-                <ImageView
-                    android:id="@+id/received_message"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    app:tint="@color/cardview_dark_background"
-                    android:src="@drawable/ic_baseline_textsms_24"/>
-
-                <TextView
-                    android:layout_marginLeft="5dp"
-                    android:id="@+id/last_message"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:layout_width="match_parent"
-                    android:layout_height="22dp"
-                    android:textSize="15sp"
-                    android:text="last message"/>
-
-            </LinearLayout>
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/time_last_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:textSize="12sp"
-            android:text="timestamp"/>
-
-        <TextView
-            android:visibility="gone"
-            android:id="@+id/msg_badge"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/badge_background"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="0"
-            android:textColor="@android:color/white"
-            android:textSize="10sp" />
-
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/time_last_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:textSize="12sp"
+        android:text="timestamp"/>
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/msg_badge"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/badge_background"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="0"
+        android:textColor="@android:color/white"
+        android:textSize="10sp" />
 
 </LinearLayout>
