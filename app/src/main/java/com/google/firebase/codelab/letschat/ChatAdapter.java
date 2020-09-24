@@ -18,7 +18,11 @@ import com.bumptech.glide.Glide;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -50,6 +54,12 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
 
         final Chat chat = getItem(position);
 
+        Calendar currentDate = Calendar.getInstance();
+        Calendar chatDate = Calendar.getInstance();
+        Date date1 = new Date();
+        currentDate.setTime(date1);
+        chatDate.setTime(chat.getTimestamp().toDate());
+
         SharedPreferences sp = getContext().getSharedPreferences("com.google.firebase.codelab.letschat", Context.MODE_PRIVATE);
 
         profilePic.setImageResource(0);
@@ -70,7 +80,12 @@ public class ChatAdapter extends ArrayAdapter<Chat> {
         }
         txtUsername.setText(chat.getUser());
         txtLastMessage.setText(chat.getLastMessage());
-        txtChatTime.setText(chat.getChatTime());
+        if(currentDate.get(Calendar.DAY_OF_YEAR) == chatDate.get(Calendar.DAY_OF_YEAR) && currentDate.get(Calendar.YEAR) == chatDate.get(Calendar.YEAR)){
+            txtChatTime.setText(chat.getChatTime());
+        }else{
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+            txtChatTime.setText(formatter.format(chat.getTimestamp().toDate()));
+        }
 
         return convertView;
     }
