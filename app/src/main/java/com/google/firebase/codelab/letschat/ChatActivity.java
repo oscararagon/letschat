@@ -74,14 +74,14 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference chatCollection;
 
-    private NotificationManagerCompat notificationManager;
+    //private NotificationManagerCompat notificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        notificationManager = NotificationManagerCompat.from(this);
+        //notificationManager = NotificationManagerCompat.from(this);
 
         getSupportActionBar().hide();
 
@@ -154,7 +154,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         new Timestamp(new Date()), System.nanoTime());
 
                 // Creo l'intent per quando si clicca su una notifica
-                Intent i = new Intent(this, ChatActivity.class);
+                /*Intent i = new Intent(this, ChatActivity.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, i, 0);
 
@@ -169,7 +169,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
                 // faccio apparire la notifica
                 notificationManager.notify(1, builder.build()); // notificationId is a unique int for each notification that you must define
-
+*/
                 break;
 
             case R.id.imgContact:

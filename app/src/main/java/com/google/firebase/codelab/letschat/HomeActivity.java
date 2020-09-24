@@ -80,6 +80,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 chats = new ArrayList<>();
                 chats.clear();
+                totalChat = 0;
                 for(QueryDocumentSnapshot chatDoc : value){
                     if(chatDoc.getId().contains(sp.getString("mobile", ""))){
                         //questa è una chat aperta
@@ -145,7 +146,9 @@ public class HomeActivity extends AppCompatActivity {
                                 chatList.setAdapter(adapter);
                                 totalChat--;
 
-                                if(totalChat < 1) chatList.setEmptyView(txtEmptyList);
+                                if(totalChat < 1) {
+                                    chatList.setEmptyView(txtEmptyList);
+                                }
 
                                 //rimuovo chat dal db. La chat non viene completamente rimossa dal db ma solo disabilitata. Quando
                                 //si manda un nuovo messaggio i vecchi messaggi vengono ripristinati
